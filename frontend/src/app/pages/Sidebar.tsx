@@ -39,12 +39,6 @@ const teacherItems = [
     icon: LayoutDashboard,
     href: "/admin-dashboard",
   },
-  {
-    title: "live Mittenig",
-    icon: LayoutDashboard,
-    href: "/meet",
-  },
-
   { title: "Add Student useing Excel", icon: Users, href: "/add-student" },
   {
     title: "Student Attendance",
