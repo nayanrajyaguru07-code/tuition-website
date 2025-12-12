@@ -9,7 +9,7 @@ const app = express();
 app.use(
   cors({
     origin: [
-      "https://school-website-nine-psi.vercel.app",
+      "https://tuition-website-jet.vercel.app",
       "https://admin-smv-topaz.vercel.app",
       "https://student-smv.vercel.app",
       "http://localhost:3000",
