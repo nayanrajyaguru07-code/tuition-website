@@ -47,17 +47,7 @@ const teacherItems = [
   },
 
   { title: "Add Student useing Excel", icon: Users, href: "/add-student" },
-  {
-    title: "Student Attendance",
-    icon: UserCheck,
-    href: "/attendance-management",
-  },
   { title: "Staff Management", icon: UserCog, href: "/staff-management" },
-  {
-    title: "feculty Attendance",
-    icon: UserCheck,
-    href: "/staff-attendance",
-  },
   { title: "Exam's", icon: ClipboardList, href: "/exam-management" },
   { title: "Fee's", icon: IndianRupee, href: "/fee-management" },
   {
@@ -65,12 +55,7 @@ const teacherItems = [
     icon: CalendarDays,
     href: "/timetable-management/view",
   },
-  { title: "Events", icon: Megaphone, href: "/event-management" },
-  {
-    title: "Holidayes",
-    icon: UmbrellaIcon,
-    href: "/holiday-management",
-  },
+
   { title: "Add Department", icon: Plus, href: "/add-school" },
 ];
 

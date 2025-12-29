@@ -15,9 +15,8 @@ import {
   Users,
   UserCog,
   IndianRupee,
-  Megaphone,
-  UmbrellaIcon,
   Plus,
+  HomeIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,30 +38,20 @@ const teacherItems = [
     icon: LayoutDashboard,
     href: "/admin-dashboard",
   },
+  {
+    title: "Home",
+    icon: HomeIcon,
+    href: "/home",
+  },
   { title: "Add Student useing Excel", icon: Users, href: "/add-student" },
-  {
-    title: "Student Attendance",
-    icon: UserCheck,
-    href: "/attendance-management",
-  },
+
   { title: "Staff Management", icon: UserCog, href: "/staff-management" },
-  {
-    title: "feculty Attendance",
-    icon: UserCheck,
-    href: "/staff-attendance",
-  },
   { title: "Exam's", icon: ClipboardList, href: "/exam-management" },
   { title: "Fee's", icon: IndianRupee, href: "/fee-management" },
   {
     title: "Timetable",
     icon: CalendarDays,
     href: "/timetable-management/view",
-  },
-  { title: "Events", icon: Megaphone, href: "/event-management" },
-  {
-    title: "Holidayes",
-    icon: UmbrellaIcon,
-    href: "/holiday-management",
   },
   { title: "Add Department", icon: Plus, href: "/add-school" },
 ];
@@ -129,7 +118,7 @@ function Sidebar({
               className="object-contain rounded"
             />
             <span className="text-lg font-semibold text-slate-800 dark:text-slate-200">
-              SMV school Dwarka
+              Tuition Name
             </span>
           </Link>
         </div>
@@ -145,7 +134,7 @@ function Sidebar({
               className="object-contain rounded"
             />
             <span className="text-lg font-semibold text-slate-800 dark:text-slate-200">
-              SMV school Dwarka
+              Tuition Name
             </span>
           </Link>
         </header>
@@ -167,7 +156,7 @@ function Sidebar({
             className="object-contain rounded"
           />
           <span className="text-lg font-semibold text-slate-800 dark:text-slate-200">
-            SMV Highschool
+            Tuition Name
           </span>
         </Link>
 
@@ -232,7 +221,7 @@ function Sidebar({
               className="object-contain rounded"
             />
             <span className="text-lg font-semibold text-slate-800 dark:text-slate-200">
-              SMV Highschool
+              Tuition Name
             </span>
           </Link>
         </div>

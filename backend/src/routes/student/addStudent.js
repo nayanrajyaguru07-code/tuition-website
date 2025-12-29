@@ -5,11 +5,10 @@ const path = require("path");
 
 const router = express.Router();
 
-
 // *** THIS IS THE MODIFIED SECTION ***
 router.post("/", async (req, res) => {
   try {
-  const { ...studentData } = req.body;
+    const { ...studentData } = req.body;
 
     const studentQuery = `
 INSERT INTO student (
