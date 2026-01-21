@@ -1,0 +1,101 @@
+// 1. Define the database connection
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ==========================
+// 1. HOSTEL (USER) MODEL
+// ==========================
+model Hostel {
+  id          Int       @id @default(autoincrement())
+  hostelName  String
+  email       String    @unique
+  password    String
+  fee         Float?    @default(0) // Base fee set by the hostel
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relation: One Hostel manages Many Students
+  students    Student[]
+
+  // Relation: One Hostel has many Fee Collections
+  feeCollections FeeCollection[]
+}
+
+// ==========================
+// 2. STUDENT MODEL
+// ==========================
+model Student {
+  id              Int      @id @default(autoincrement())
+
+  // --- Personal Details ---
+  fullName        String
+  fatherName      String
+  dob             DateTime
+  age             Int
+  gender          String
+  nationality     String
+  category        String?  // Optional (e.g., General / OBC / SC / ST)
+
+  // --- Contact Details ---
+  studentMobileNo    String
+  email              String   @unique
+  fatherPhoneNo      String
+  emergencyContactNo String
+  permanentAddress   String
+
+  // --- Academic Details ---
+  schoolCollegeName  String
+  courseClassYear    String   // e.g., "B.Tech 3rd Year"
+
+  // --- Hostel Details ---
+  dateOfJoining   DateTime @default(now())
+  
+  // Foreign Key (Link to Hostel)
+  hostelId        Int
+  hostel          Hostel   @relation(fields: [hostelId], references: [id])
+
+  // --- Documents (URLs) ---
+  passportPhotoUrl   String?  // URL to stored image
+  idProofUrl         String?  // URL (Aadhaar / Passport / Voter ID)
+  admissionProofUrl  String?  // URL (Fee Receipt)
+  parentIdProofUrl   String?  // URL (Parent's ID)
+
+  // --- Timestamps ---
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relation: One Student has many Payment Records
+  feeCollections FeeCollection[]
+}
+
+// ==========================
+// 3. FEE COLLECTION MODEL
+// ==========================
+model FeeCollection {
+  id              Int      @id @default(autoincrement())
+  
+  // Payment Details
+  amount          Float
+  paymentDate     DateTime @default(now())
+  paymentMethod   String   // e.g., "Cash", "UPI", "Bank Transfer", "Cheque"
+  transactionId   String?  // Optional: For UPI/Bank Ref No.
+  remarks         String?  // Optional: e.g., "January Month Fee" or "Late Fine included"
+  
+  // Relationships
+  studentId       Int
+  student         Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  hostelId        Int
+  hostel          Hostel   @relation(fields: [hostelId], references: [id])
+
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
