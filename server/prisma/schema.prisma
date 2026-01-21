@@ -107,6 +107,9 @@ model FeeCollection {
   updatedAt       DateTime @updatedAt
 }
 
+// ==========================
+// 4. EMPLOYEE MODEL
+// ==========================
 model Employee {
   id            Int      @id @default(autoincrement())
   
@@ -138,7 +141,7 @@ model Employee {
 }
 
 // ==========================
-// 4. SALARY PAYMENT MODEL
+// 5. SALARY PAYMENT MODEL
 // ==========================
 model SalaryPayment {
   id              Int      @id @default(autoincrement())
@@ -161,7 +164,7 @@ model SalaryPayment {
 }
 
 // ==========================
-// 5. GENERAL EXPENSE MODEL
+// 6. GENERAL EXPENSE MODEL
 // ==========================
 model Expense {
   id              Int      @id @default(autoincrement())
