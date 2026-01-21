@@ -1,12 +1,5 @@
-import React from "react";
-import HomePage from "../pages/Home";
+import Home from "@/app/pages/Home";
 
-const page = () => {
-  return (
-    <div>
-      <HomePage />
-    </div>
-  );
-};
-
-export default page;
+export default function DashboardPage() {
+  return <Home />;
+}
