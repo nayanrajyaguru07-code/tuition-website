@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Menu, X, LogOut } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 export default function Header() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -15,8 +17,13 @@ export default function Header() {
 
   const logout = () => {
     localStorage.clear();
-    window.location.href = "/auth";
+    window.location.href = "/";
   };
+
+  // 🚫 Hide header on /auth and all sub-routes
+  if (pathname == "/") {
+    return null;
+  }
 
   const NavLinks = () => (
     <>
@@ -40,7 +47,7 @@ export default function Header() {
   );
 
   return (
-    <header className="sticky top-0 z-50 p-4 max-w-7xl md:min-w-7xl rounded-full md:ml-30 mb-5 bg-white/90 backdrop-blur border-b border-orange-100 shadow-sm">
+    <header className="sticky top-0 z-50 p-4 max-w-7xl md:min-w-7xl mt-2 rounded-full md:ml-30 mb-5 bg-white/90 backdrop-blur border-b border-orange-100 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-between">
         {/* LOGO */}
         <Link
