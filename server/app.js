@@ -6,6 +6,8 @@ import authRouter from "./src/routes/auth.js";
 import userRouter from "./src/routes/user.js";
 import studentRouter from "./src/routes/student.js";
 import feeCollectionRouter from "./src/routes/feeCollection.js";
+import employeeRouter from "./src/routes/employee.js";
+import expenseRouter from "./src/routes/expense.js";
 
 const app = express();
 
@@ -35,5 +37,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
 app.use("/api/student", studentRouter);
 app.use("/api/fee-collection", feeCollectionRouter);
+app.use("/api/employee", employeeRouter);
+app.use("/api/expense", expenseRouter);
 
 export default app;

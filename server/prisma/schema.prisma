@@ -26,6 +26,13 @@ model Hostel {
 
   // Relation: One Hostel has many Fee Collections
   feeCollections FeeCollection[]
+
+  // Relation: One Hostel has many Employees
+  employees Employee[]
+
+  // Relations: expense and salary
+  salaryPayments SalaryPayment[]
+  expenses       Expense[]
 }
 
 // ==========================
@@ -96,6 +103,81 @@ model FeeCollection {
   hostel          Hostel   @relation(fields: [hostelId], references: [id])
 
   // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Employee {
+  id            Int      @id @default(autoincrement())
+  
+  // --- Personal Details ---
+  name          String
+  email         String?  // Optional, as some staff (e.g. cleaners) might not have email
+  phone         String
+  address       String?
+  gender        String?  
+  
+  // --- Job Details ---
+  role          String   // e.g., "Warden", "Security Guard", "Cook", "Sweeper"
+  salary        Float?
+  dateOfJoining DateTime @default(now())
+  
+  // --- Media ---
+  photoUrl      String?
+
+  // --- Relation ---
+  hostelId      Int
+  hostel        Hostel   @relation(fields: [hostelId], references: [id])
+
+  // --- Timestamps ---
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relation: One Employee has many Salary Records
+  salaryPayments SalaryPayment[]
+}
+
+// ==========================
+// 4. SALARY PAYMENT MODEL
+// ==========================
+model SalaryPayment {
+  id              Int      @id @default(autoincrement())
+  
+  amount          Float
+  salaryMonth     String   // e.g., "January 2026"
+  paymentDate     DateTime @default(now())
+  paymentMethod   String   // e.g., "Cash", "Bank Transfer"
+  remarks         String?  // Optional notes
+
+  // Relations
+  employeeId      Int
+  employee        Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  hostelId        Int
+  hostel          Hostel   @relation(fields: [hostelId], references: [id])
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// ==========================
+// 5. GENERAL EXPENSE MODEL
+// ==========================
+model Expense {
+  id              Int      @id @default(autoincrement())
+  
+  title           String   // e.g., "Electricity Bill", "Vegetables", "Plumber"
+  amount          Float
+  expenseDate     DateTime @default(now())
+  category        String?  // e.g., "Utilities", "Food", "Maintenance"
+  paymentMethod   String?
+  description     String?
+  billUrl         String?  // Optional: Upload photo of receipt/bill
+
+  // Relation
+  hostelId        Int
+  hostel          Hostel   @relation(fields: [hostelId], references: [id])
+
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
