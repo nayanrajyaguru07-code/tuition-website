@@ -200,4 +200,126 @@ feeCollectionRouter.put("/update-fee-record/:id", async (req, res) => {
   }
 });
 
+// ==========================
+// GET SINGLE STUDENT FEE HISTORY
+// ==========================
+feeCollectionRouter.get("/student-fee-history/:studentId", async (req, res) => {
+  try {
+    // const hostelId = req.user.id;
+    const hostelId = 1;
+
+    const studentId = parseInt(req.params.studentId);
+
+    if (isNaN(studentId)) {
+      return res.status(400).json({ message: "Invalid Student ID" });
+    }
+
+    // 1. Verify Student Exists & Belongs to Hostel
+    const student = await Prisma.student.findFirst({
+      where: { id: studentId, hostelId: hostelId },
+      select: { fullName: true, studentMobileNo: true },
+    });
+
+    if (!student) {
+      return res
+        .status(404)
+        .json({ message: "Student not found or access denied" });
+    }
+
+    // 2. Fetch Fee Records
+    const feeRecords = await Prisma.feeCollection.findMany({
+      where: {
+        studentId: studentId,
+        hostelId: hostelId, // Redundant safety check, but good practice
+      },
+      orderBy: {
+        paymentDate: "desc", // Show newest payments first
+      },
+    });
+
+    // 3. Calculate Total Paid
+    // Use .reduce to sum up the 'amount' field
+    const totalPaid = feeRecords.reduce(
+      (sum, record) => sum + record.amount,
+      0,
+    );
+
+    res.status(200).json({
+      student: student,
+      totalPaid: totalPaid,
+      count: feeRecords.length,
+      history: feeRecords,
+    });
+  } catch (error) {
+    console.error("Get Student Fee History Error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// ==========================
+// GET STUDENT FEE STATUS (Total, Paid, Due)
+// ==========================
+feeCollectionRouter.get("/student-fee-status/:studentId", async (req, res) => {
+  try {
+    // const hostelId = req.user.id;
+    const hostelId = 1;
+
+    const studentId = parseInt(req.params.studentId);
+
+    if (isNaN(studentId)) {
+      return res.status(400).json({ message: "Invalid Student ID" });
+    }
+
+    // 1. Get Hostel Details (to find the Total Fee)
+    const hostel = await Prisma.hostel.findUnique({
+      where: { id: hostelId },
+      select: { fee: true }, // We only need the fee column
+    });
+
+    if (!hostel) {
+      return res.status(404).json({ message: "Hostel not found" });
+    }
+
+    // 2. Get Student Details (Name, etc.)
+    const student = await Prisma.student.findFirst({
+      where: { id: studentId, hostelId: hostelId },
+      select: { id: true, fullName: true, studentMobileNo: true },
+    });
+
+    if (!student) {
+      return res
+        .status(404)
+        .json({ message: "Student not found or access denied" });
+    }
+
+    // 3. Calculate Total Paid (Sum of all records)
+    const paymentStats = await Prisma.feeCollection.aggregate({
+      where: {
+        studentId: studentId,
+        hostelId: hostelId,
+      },
+      _sum: {
+        amount: true,
+      },
+    });
+
+    // Handle null values (if no fee set or no payments made)
+    const totalFee = hostel.fee || 0;
+    const totalPaid = paymentStats._sum.amount || 0;
+    const dueFee = totalFee - totalPaid;
+
+    res.status(200).json({
+      student: student,
+      feeStatus: {
+        totalFee: totalFee, // From Hostel Table
+        totalPaid: totalPaid, // Sum of collected fees
+        dueFee: dueFee, // Calculated Balance
+      },
+    });
+  } catch (error) {
+    console.error("Get Fee Status Error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 export default feeCollectionRouter;
