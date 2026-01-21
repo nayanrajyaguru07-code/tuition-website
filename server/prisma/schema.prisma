@@ -108,9 +108,14 @@ model FeeCollection {
 }
 
 // ==========================
+<<<<<<< HEAD
 // 4. Employee MODEL 
 // ==========================
 
+=======
+// 4. EMPLOYEE MODEL
+// ==========================
+>>>>>>> d3656c0181e50ff3733d10df928442d53394e6c4
 model Employee {
   id            Int      @id @default(autoincrement())
   
