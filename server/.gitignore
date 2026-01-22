@@ -10,3 +10,8 @@
 
 # env files (can opt-in for committing if needed)
 .env*
+
+# WhatsApp Session Files
+RemoteAuth-*
+.wwebjs_cache/
+.wwebjs_auth/
