@@ -107,7 +107,7 @@ dashboardRouter.get("/stats/monthly-finance", async (req, res) => {
 // 3. RECOMMENDED: THIS MONTH'S RECOVERY
 // ==========================
 // Shows how much fee is collected vs pending for the CURRENT MONTH only
-router.get("/stats/current-month-recovery", async (req, res) => {
+dashboardRouter.get("/stats/current-month-recovery", async (req, res) => {
   try {
     // const hostelId = req.user.id;
     const hostelId = 1;
@@ -152,4 +152,4 @@ router.get("/stats/current-month-recovery", async (req, res) => {
   }
 });
 
-export default router;
+export default dashboardRouter;

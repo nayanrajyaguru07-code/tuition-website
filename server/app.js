@@ -9,6 +9,7 @@ import feeCollectionRouter from "./src/routes/feeCollection.js";
 import employeeRouter from "./src/routes/employee.js";
 import expenseRouter from "./src/routes/expense.js";
 import salaryRouter from "./src/routes/salary.js";
+import dashboardRouter from "./src/routes/dashboard.js";
 
 const app = express();
 
@@ -41,5 +42,6 @@ app.use("/api/fee-collection", feeCollectionRouter);
 app.use("/api/employee", employeeRouter);
 app.use("/api/expense", expenseRouter);
 app.use("/api/salary", salaryRouter);
+app.use("/api/dashboard", dashboardRouter);
 
 export default app;
