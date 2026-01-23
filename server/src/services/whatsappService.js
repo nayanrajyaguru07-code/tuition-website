@@ -10,18 +10,7 @@ const SESSION_ID = "hostel";
 export let whatsappClient = null;
 
 export const initializeWhatsapp = async () => {
-  console.log("🔄 Initializing WhatsApp (Render Optimized)...");
-
-  try {
-    const existingSession = await Prisma.whatsappSession.findUnique({
-      where: { sessionId: SESSION_ID },
-    });
-    if (existingSession && existingSession.data) {
-      console.log("✅ Found session in DB. Restoring...");
-    } else {
-      console.log("ℹ️ No session in DB. Preparing QR Code...");
-    }
-  } catch (err) {}
+  console.log("🔄 Initializing WhatsApp (Ultra-Lite Mode)...");
 
   whatsappClient = new Client({
     authStrategy: new RemoteAuth({
@@ -30,33 +19,39 @@ export const initializeWhatsapp = async () => {
       backupSyncIntervalMs: 600000,
       dataPath: ".wwebjs_auth",
     }),
-    // ⚠️ CRITICAL: Increase timeout for slow Render servers
-    authTimeoutMs: 60000,
-    qrMaxRetries: 5,
+    // Increase timeouts significantly for slow free servers
+    authTimeoutMs: 120000, // 2 Minutes
+    qrMaxRetries: 10,
     puppeteer: {
       headless: true,
-      // ⚠️ CRITICAL: Point to the installed Chrome manually to be safe
       executablePath:
         "/opt/render/project/src/.cache/chrome/linux-143.0.7499.192/chrome-linux64/chrome",
       args: [
         "--no-sandbox",
         "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage", // Fixes crashes in Docker/Render
+        "--disable-dev-shm-usage",
         "--disable-accelerated-2d-canvas",
         "--no-first-run",
         "--no-zygote",
-        "--single-process", // ⚠️ Vital for low RAM (512MB)
+        "--single-process",
         "--disable-gpu",
+        "--disable-extensions", // ⬇️ SAVES MEMORY
+        "--disable-software-rasterizer", // ⬇️ SAVES MEMORY
+        "--mute-audio", // ⬇️ SAVES MEMORY
+        "--disable-background-networking", // ⬇️ SAVES MEMORY
+        "--disable-default-apps", // ⬇️ SAVES MEMORY
+        "--disable-sync", // ⬇️ SAVES MEMORY
+        "--disable-translate", // ⬇️ SAVES MEMORY
+        "--metrics-recording-only", // ⬇️ SAVES MEMORY
       ],
     },
   });
 
   whatsappClient.on("qr", (qr) => {
-    // Print QR code to logs so you can scan it from Render Dashboard
     console.log("▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄");
-    console.log("📲 SCAN THIS QR CODE NOW:");
+    console.log("📲 SCAN QUICKLY! (Server might restart due to low RAM)");
+    console.log("▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄");
     qrcode.generate(qr, { small: true });
-    console.log("▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄");
   });
 
   whatsappClient.on("ready", () => {
@@ -67,7 +62,6 @@ export const initializeWhatsapp = async () => {
     console.log("💾 Session successfully saved to Database!");
   });
 
-  // Log disconnection reasons to debug future crashes
   whatsappClient.on("disconnected", (reason) => {
     console.log("❌ Client Disconnected:", reason);
   });
