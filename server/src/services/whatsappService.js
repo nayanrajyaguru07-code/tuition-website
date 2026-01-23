@@ -1,9 +1,7 @@
 import pkg from "whatsapp-web.js";
-const { Client, RemoteAuth } = pkg; // ✅ Back to RemoteAuth for Render
+const { Client, RemoteAuth } = pkg;
 import qrcode from "qrcode-terminal";
 import Prisma from "../lib/prisma.js";
-
-// ✅ Import the DatabaseStore we created
 import DatabaseStore from "../utils/DatabaseStore.js";
 
 const store = new DatabaseStore();
@@ -12,17 +10,16 @@ const SESSION_ID = "hostel";
 export let whatsappClient = null;
 
 export const initializeWhatsapp = async () => {
-  console.log("🔄 Initializing WhatsApp (RemoteAuth for Render)...");
+  console.log("🔄 Initializing WhatsApp (Render Optimized)...");
 
-  // Optional: Check DB logs to see if data exists
   try {
     const existingSession = await Prisma.whatsappSession.findUnique({
       where: { sessionId: SESSION_ID },
     });
     if (existingSession && existingSession.data) {
-      console.log("✅ Found session data in Database. Restoring...");
+      console.log("✅ Found session in DB. Restoring...");
     } else {
-      console.log("ℹ️ No session in Database. You will need to scan QR.");
+      console.log("ℹ️ No session in DB. Preparing QR Code...");
     }
   } catch (err) {}
 
@@ -30,26 +27,36 @@ export const initializeWhatsapp = async () => {
     authStrategy: new RemoteAuth({
       clientId: SESSION_ID,
       store: store,
-      backupSyncIntervalMs: 600000, // Backup every 10 minutes
-      dataPath: ".wwebjs_auth", // Temp folder (Render will delete this on restart, which is fine)
+      backupSyncIntervalMs: 600000,
+      dataPath: ".wwebjs_auth",
     }),
+    // ⚠️ CRITICAL: Increase timeout for slow Render servers
+    authTimeoutMs: 60000,
+    qrMaxRetries: 5,
     puppeteer: {
       headless: true,
+      // ⚠️ CRITICAL: Point to the installed Chrome manually to be safe
+      executablePath:
+        "/opt/render/project/src/.cache/chrome/linux-143.0.7499.192/chrome-linux64/chrome",
       args: [
         "--no-sandbox",
         "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage",
+        "--disable-dev-shm-usage", // Fixes crashes in Docker/Render
         "--disable-accelerated-2d-canvas",
         "--no-first-run",
         "--no-zygote",
+        "--single-process", // ⚠️ Vital for low RAM (512MB)
         "--disable-gpu",
       ],
     },
   });
 
   whatsappClient.on("qr", (qr) => {
-    console.log("📲 Scan this QR Code to login:");
+    // Print QR code to logs so you can scan it from Render Dashboard
+    console.log("▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄");
+    console.log("📲 SCAN THIS QR CODE NOW:");
     qrcode.generate(qr, { small: true });
+    console.log("▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄");
   });
 
   whatsappClient.on("ready", () => {
@@ -60,8 +67,9 @@ export const initializeWhatsapp = async () => {
     console.log("💾 Session successfully saved to Database!");
   });
 
-  whatsappClient.on("auth_failure", async (msg) => {
-    console.error("❌ Authentication Failed:", msg);
+  // Log disconnection reasons to debug future crashes
+  whatsappClient.on("disconnected", (reason) => {
+    console.log("❌ Client Disconnected:", reason);
   });
 
   try {
