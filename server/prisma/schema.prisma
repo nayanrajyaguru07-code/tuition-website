@@ -188,7 +188,8 @@ model Expense {
 model WhatsappSession {
   id        String   @id @default(cuid())
   sessionId String   @unique
-  data      String   // This will store the session JSON/Zip
+  // IMPORTANT: Use @db.Text for Postgres to allow large strings
+  data      String   @db.Text 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

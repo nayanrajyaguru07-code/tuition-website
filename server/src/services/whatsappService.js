@@ -1,53 +1,70 @@
 import pkg from "whatsapp-web.js";
-const { Client, LocalAuth } = pkg; // Switch to LocalAuth
+const { Client, RemoteAuth } = pkg; // ✅ Back to RemoteAuth for Render
 import qrcode from "qrcode-terminal";
+import Prisma from "../lib/prisma.js";
 
-// Global client instance
-export let whatsappClient;
+// ✅ Import the DatabaseStore we created
+import DatabaseStore from "../utils/DatabaseStore.js";
+
+const store = new DatabaseStore();
+const SESSION_ID = "hostel";
+
+export let whatsappClient = null;
 
 export const initializeWhatsapp = async () => {
-  console.log("🔄 Initializing WhatsApp...");
+  console.log("🔄 Initializing WhatsApp (RemoteAuth for Render)...");
 
-  // SETUP: Create Client with LocalAuth
-  // This automatically saves your session to the '.wwebjs_auth' folder
+  // Optional: Check DB logs to see if data exists
+  try {
+    const existingSession = await Prisma.whatsappSession.findUnique({
+      where: { sessionId: SESSION_ID },
+    });
+    if (existingSession && existingSession.data) {
+      console.log("✅ Found session data in Database. Restoring...");
+    } else {
+      console.log("ℹ️ No session in Database. You will need to scan QR.");
+    }
+  } catch (err) {}
+
   whatsappClient = new Client({
-    authStrategy: new LocalAuth({
-      clientId: "hostel-admin", // This creates a folder named 'client-hostel-admin'
+    authStrategy: new RemoteAuth({
+      clientId: SESSION_ID,
+      store: store,
+      backupSyncIntervalMs: 600000, // Backup every 10 minutes
+      dataPath: ".wwebjs_auth", // Temp folder (Render will delete this on restart, which is fine)
     }),
     puppeteer: {
       headless: true,
       args: [
         "--no-sandbox",
         "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage",
+        "--disable-dev-shm-usage", // Critical for Render (prevents memory crashes)
+        "--disable-gpu",
+        "--disable-extensions",
       ],
     },
   });
 
-  // LISTEN: Handle Events
-
-  // EVENT: QR Code (Fires only if you are NOT logged in)
   whatsappClient.on("qr", (qr) => {
-    console.log("⚠️ No saved session found. Please scan this QR:");
+    console.log("📲 Scan this QR Code to login:");
     qrcode.generate(qr, { small: true });
   });
 
-  // EVENT: Ready (Connection Successful)
   whatsappClient.on("ready", () => {
     console.log("🚀 WhatsApp Client is Ready!");
   });
 
-  // EVENT: Auth Failure
-  whatsappClient.on("auth_failure", (msg) => {
-    console.error("❌ Authentication Failed:", msg);
-    // If auth fails, the folder might be corrupted.
-    // You would manually delete '.wwebjs_auth' folder to reset.
+  whatsappClient.on("remote_session_saved", () => {
+    console.log("💾 Session successfully saved to Database!");
   });
 
-  // START
+  whatsappClient.on("auth_failure", async (msg) => {
+    console.error("❌ Authentication Failed:", msg);
+  });
+
   try {
     await whatsappClient.initialize();
   } catch (err) {
-    console.error("Initialization Error:", err);
+    console.error("❌ WhatsApp Init Error:", err.message);
   }
 };

@@ -17,6 +17,7 @@ const app = express();
 
 (async () => {
   await wakeNeon(); // ⬅️ CRITICAL
+  initializeWhatsapp();
 })();
 
 // Middleware
@@ -46,8 +47,5 @@ app.use("/api/expense", expenseRouter);
 app.use("/api/salary", salaryRouter);
 app.use("/api/dashboard", dashboardRouter);
 app.use("/api/whatsapp", whatsappRouter);
-
-// Initialize WhatsApp
-initializeWhatsapp();
 
 export default app;
