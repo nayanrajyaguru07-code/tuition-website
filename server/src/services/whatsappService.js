@@ -38,9 +38,11 @@ export const initializeWhatsapp = async () => {
       args: [
         "--no-sandbox",
         "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage", // Critical for Render (prevents memory crashes)
+        "--disable-dev-shm-usage",
+        "--disable-accelerated-2d-canvas",
+        "--no-first-run",
+        "--no-zygote",
         "--disable-gpu",
-        "--disable-extensions",
       ],
     },
   });

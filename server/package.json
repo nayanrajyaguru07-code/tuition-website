@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
-    "dev": "nodemon index.js --ignore .wwebjs_auth/ --ignore .wwebjs_cache/ --ignore temp_db_copy_*/ --ignore *.zip"
+    "dev": "nodemon index.js --ignore .wwebjs_auth/ --ignore .wwebjs_cache/ --ignore temp_db_copy_*/ --ignore *.zip",
+    "postinstall": "npx puppeteer browsers install chrome"
   },
   "keywords": [],
   "author": "",
