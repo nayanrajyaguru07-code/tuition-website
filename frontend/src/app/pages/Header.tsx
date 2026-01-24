@@ -4,15 +4,27 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Menu, X, LogOut } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { API } from "@/lib/api";
 
 export default function Header() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [hostelName, setHostelName] = useState("Hostel Manager");
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     setIsLoggedIn(!!token);
+
+    if (token) {
+      API.get("/api/auth/me")
+        .then((res) => {
+          if (res.data?.hostel?.hostelName) {
+            setHostelName(res.data.hostel.hostelName);
+          }
+        })
+        .catch((err) => console.error("Header Auth Error", err));
+    }
   }, []);
 
   const logout = () => {
@@ -20,8 +32,8 @@ export default function Header() {
     window.location.href = "/";
   };
 
-  // 🚫 Hide header on /auth and all sub-routes
-  if (pathname == "/") {
+  // 🚫 Hide header on /auth and all sub-routes, and admin login
+  if (pathname === "/" || pathname === "/admin/login") {
     return null;
   }
 
@@ -29,6 +41,8 @@ export default function Header() {
     <>
       {[
         ["Home", "/home"],
+        ["Dashboard", "/admin/dashboard"],
+        ["Salary", "/admin/salary"],
         ["Students", "/students"],
         ["Add Student", "/students/add"],
         ["Fee", "/fee"],
@@ -51,10 +65,10 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-between">
         {/* LOGO */}
         <Link
-          href="/dashboard"
+          href="/home"
           className="text-lg md:text-xl font-extrabold tracking-tight bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent"
         >
-          Hostel Manager
+          {hostelName}
         </Link>
 
         {/* DESKTOP NAV */}

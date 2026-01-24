@@ -20,10 +20,14 @@ type FeeHistory = {
   feeRemark: string | null;
 };
 
-export default function FeeForm() {
+export default function FeeForm({
+  initialTab = "collect",
+}: {
+  initialTab?: "collect" | "history" | "status" | "edit" | "studentHistory";
+}) {
   const [tab, setTab] = useState<
     "collect" | "history" | "status" | "edit" | "studentHistory"
-  >("collect");
+  >(initialTab);
 
   const [students, setStudents] = useState<Student[]>([]);
   const [studentId, setStudentId] = useState("");
@@ -38,9 +42,10 @@ export default function FeeForm() {
   const [studentHistory, setStudentHistory] = useState<any[]>([]);
   const [status, setStatus] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [baseFee, setBaseFee] = useState<number | null>(null);
 
   const inputClass =
-    "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500";
+    "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500";
   const labelClass = "text-sm font-medium text-gray-700";
 
   // 🔹 Load students once
@@ -141,7 +146,8 @@ export default function FeeForm() {
 
   useEffect(() => {
     if (tab === "history") loadHistory();
-  }, [tab]);
+    if ((tab === "studentHistory" || tab === "edit") && studentId) loadStudentHistory();
+  }, [tab, studentId]);
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -164,7 +170,7 @@ export default function FeeForm() {
               onClick={() => setTab(key as any)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
                 tab === key
-                  ? "bg-blue-600 text-white"
+                  ? "bg-orange-600 text-white"
                   : "bg-gray-100 hover:bg-gray-200"
               }`}
             >
@@ -175,11 +181,29 @@ export default function FeeForm() {
 
         {/* STUDENT SELECTOR */}
         <div className="mb-6">
-          <label className={labelClass}>Select Student</label>
+          <div className="flex justify-between items-center mb-1">
+             <label className={labelClass}>Select Student</label>
+             {baseFee !== null && (
+               <span className="text-xs font-semibold text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full border border-orange-100">
+                 Base Fee: ₹{baseFee}
+               </span>
+             )}
+          </div>
           <select
             className={inputClass}
             value={studentId}
-            onChange={(e) => setStudentId(e.target.value)}
+            onChange={async (e) => {
+                setStudentId(e.target.value);
+                if(e.target.value) {
+                    try {
+                        const res = await API.get(`/api/fee-collection/student-fee-status/${e.target.value}`);
+                        setBaseFee(res.data.feeStatus.totalFee);
+                        setStatus(res.data);
+                    } catch(err) { console.error(err); }
+                } else {
+                    setBaseFee(null);
+                }
+            }}
           >
             <option value="">-- Select Student --</option>
             {students.map((s) => (
@@ -247,7 +271,7 @@ export default function FeeForm() {
             <button
               onClick={collectFee}
               disabled={loading}
-              className="md:col-span-2 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold transition disabled:opacity-50"
+              className="md:col-span-2 bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-xl font-semibold transition disabled:opacity-50"
             >
               {loading ? "Processing..." : "Collect Fee"}
             </button>
@@ -291,7 +315,7 @@ export default function FeeForm() {
           <div className="space-y-4">
             <button
               onClick={loadStudentHistory}
-              className="bg-blue-600 text-white px-5 py-2 rounded-lg"
+              className="bg-orange-600 text-white px-5 py-2 rounded-lg"
             >
               Load History
             </button>
@@ -315,7 +339,7 @@ export default function FeeForm() {
           <div className="space-y-4">
             <button
               onClick={loadStatus}
-              className="bg-blue-600 text-white px-5 py-2 rounded-lg"
+              className="bg-orange-600 text-white px-5 py-2 rounded-lg"
             >
               Check Status
             </button>
@@ -334,12 +358,38 @@ export default function FeeForm() {
         {/* EDIT FEE */}
         {tab === "edit" && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div>
+            <div className="md:col-span-2">
+              <label className={labelClass}>Select Transaction to Edit</label>
+              <select 
+                className={inputClass}
+                onChange={(e) => {
+                    const tx = studentHistory.find(h => h.id === Number(e.target.value));
+                    if (tx) {
+                        setEditId(String(tx.id));
+                        setAmount(String(tx.amount));
+                        if(tx.paymentDate) setPaymentDate(new Date(tx.paymentDate).toISOString().split('T')[0]);
+                        setPaymentMethod(tx.paymentMethod);
+                        setTransactionId(tx.transactionId || "");
+                        setRemarks(tx.remarks || ""); // Note: backend uses 'remarks' in get-student-history
+                    }
+                }}
+              >
+                <option value="">-- Select a Transaction --</option>
+                {studentHistory.map(h => (
+                    <option key={h.id} value={h.id}>
+                        {new Date(h.paymentDate).toLocaleDateString()} — ₹{h.amount} ({h.paymentMethod})
+                    </option>
+                ))}
+              </select>
+            </div>
+            
+            {/* Hidden or ReadOnly Edit ID for reference */}
+            <div className="hidden">
               <label className={labelClass}>Record ID</label>
               <input
                 className={inputClass}
                 value={editId}
-                onChange={(e) => setEditId(e.target.value)}
+                readOnly
               />
             </div>
 
@@ -397,7 +447,7 @@ export default function FeeForm() {
             <button
               onClick={updateFee}
               disabled={loading}
-              className="md:col-span-2 bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-semibold transition disabled:opacity-50"
+              className="md:col-span-2 bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-xl font-semibold transition disabled:opacity-50"
             >
               {loading ? "Updating..." : "Update Fee Record"}
             </button>

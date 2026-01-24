@@ -1,12 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { API } from "@/lib/api";
 import toast from "react-hot-toast";
 
-export default function StudentForm({ id }: { id?: string }) {
-  const [data, setData] = useState<any>({});
+export default function StudentForm({ id, onSuccess }: { id?: string; onSuccess?: () => void }) {
+  const [data, setData] = useState<any>({
+    nationality: "Indian",
+    category: "Hindu",
+  });
+
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (id) {
+      setLoading(true);
+      API.get(`/api/student/get-student/${id}`)
+        .then((res) => {
+          if (res.data?.student) {
+             const s = res.data.student;
+             // Ensure dates are formatted for input type='date'
+             if(s.dob) s.dob = s.dob.split('T')[0];
+             setData(s);
+          }
+        })
+        .catch((err) => console.error(err))
+        .finally(() => setLoading(false));
+    }
+  }, [id]);
 
   const submit = async () => {
     try {
@@ -21,6 +42,7 @@ export default function StudentForm({ id }: { id?: string }) {
         await API.post("/api/student/add-student", formData);
         toast.success("Student added successfully");
       }
+      if (onSuccess) onSuccess();
     } catch (err) {
       console.error(err);
       toast.error("Failed to save student");
@@ -30,271 +52,199 @@ export default function StudentForm({ id }: { id?: string }) {
   };
 
   const inputClass =
-    "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500";
+    "w-full rounded-xl border border-orange-200 bg-orange-50/60 px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition";
 
-  const labelClass = "text-sm font-medium text-gray-700";
+  const labelClass = "text-sm font-semibold text-orange-700 mb-1 block";
 
   const fileClass =
-    "block w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer";
+    "block w-full text-sm text-gray-700 file:mr-3 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:bg-gradient-to-r file:from-orange-400 file:to-red-400 file:text-white hover:file:opacity-90 cursor-pointer";
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-8">
-        <h2 className="text-2xl font-bold mb-6 text-gray-900">
+    <div className="min-h-screen p-6">
+      <div className="max-w-4xl mx-auto bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-10 border border-orange-200">
+        <h2 className="text-3xl font-extrabold mb-8 text-center text-orange-600">
           {id ? "Update Student" : "Add New Student"}
         </h2>
 
         {/* BASIC INFO */}
-        <div className="mb-8">
-          <h3 className="text-lg font-semibold mb-4 text-gray-800">
+        <div className="mb-10">
+          <h3 className="text-lg font-bold text-red-500 border-l-4 border-orange-400 pl-3 mb-5">
             Basic Information
           </h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className={labelClass}>Full Name</label>
-              <input
-                className={inputClass}
-                placeholder="John Doe"
-                onChange={(e) => setData({ ...data, fullName: e.target.value })}
-              />
+              <input className={inputClass} placeholder="John Doe" onChange={(e) => setData({ ...data, fullName: e.target.value })} />
             </div>
 
             <div>
               <label className={labelClass}>Father Name</label>
-              <input
-                className={inputClass}
-                placeholder="Mr. Doe"
-                onChange={(e) =>
-                  setData({ ...data, fatherName: e.target.value })
-                }
-              />
+              <input className={inputClass} placeholder="Mr. Doe" onChange={(e) => setData({ ...data, fatherName: e.target.value })} />
             </div>
 
             <div>
               <label className={labelClass}>Date of Birth</label>
-              <input
-                type="date"
-                className={inputClass}
-                onChange={(e) => setData({ ...data, dob: e.target.value })}
-              />
+              <input type="date" className={inputClass} onChange={(e) => setData({ ...data, dob: e.target.value })} />
             </div>
 
             <div>
               <label className={labelClass}>Age</label>
-              <input
-                className={inputClass}
-                placeholder="18"
-                onChange={(e) => setData({ ...data, age: e.target.value })}
-              />
+              <input className={inputClass} placeholder="18" onChange={(e) => setData({ ...data, age: e.target.value })} />
             </div>
 
-            <div>
-              <label className={labelClass}>Gender</label>
-              <input
-                className={inputClass}
-                placeholder="Male / Female"
-                onChange={(e) => setData({ ...data, gender: e.target.value })}
-              />
-            </div>
+           <div>
+  <label className={labelClass}>Gender</label>
+  <div className="flex gap-6 mt-2">
+    {["Male", "Female", "Other"].map((g) => (
+      <label key={g} className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+        <input
+          type="radio"
+          name="gender"
+          value={g}
+          checked={data.gender === g}
+          onChange={(e) => setData({ ...data, gender: e.target.value })}
+          className="accent-orange-500"
+        />
+        {g}
+      </label>
+    ))}
+  </div>
+</div>
+
+
+         <div>
+  <label className={labelClass}>Nationality</label>
+  <input
+    className={inputClass}
+    value={data.nationality}
+    onChange={(e) => setData({ ...data, nationality: e.target.value })}
+  />
+</div>
+
 
             <div>
-              <label className={labelClass}>Nationality</label>
-              <input
-                className={inputClass}
-                placeholder="Indian"
-                onChange={(e) =>
-                  setData({ ...data, nationality: e.target.value })
-                }
-              />
-            </div>
+  <label className={labelClass}>Category</label>
+  <input
+    className={inputClass}
+    value={data.category}
+    onChange={(e) => setData({ ...data, category: e.target.value })}
+  />
+</div>
 
-            <div>
-              <label className={labelClass}>Category</label>
-              <input
-                className={inputClass}
-                placeholder="General / OBC / SC / ST"
-                onChange={(e) => setData({ ...data, category: e.target.value })}
-              />
-            </div>
           </div>
         </div>
 
         {/* CONTACT INFO */}
-        <div className="mb-8">
-          <h3 className="text-lg font-semibold mb-4 text-gray-800">
+        <div className="mb-10">
+          <h3 className="text-lg font-bold text-red-500 border-l-4 border-orange-400 pl-3 mb-5">
             Contact Information
           </h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div>
-              <label className={labelClass}>Student Mobile</label>
-              <input
-                className={inputClass}
-                placeholder="9876543210"
-                onChange={(e) =>
-                  setData({
-                    ...data,
-                    studentMobileNo: e.target.value,
-                  })
-                }
-              />
-            </div>
-
-            <div>
-              <label className={labelClass}>Email</label>
-              <input
-                className={inputClass}
-                placeholder="student@example.com"
-                onChange={(e) => setData({ ...data, email: e.target.value })}
-              />
-            </div>
-
-            <div>
-              <label className={labelClass}>Father Phone</label>
-              <input
-                className={inputClass}
-                placeholder="9876543210"
-                onChange={(e) =>
-                  setData({
-                    ...data,
-                    fatherPhoneNo: e.target.value,
-                  })
-                }
-              />
-            </div>
-
-            <div>
-              <label className={labelClass}>Emergency Contact</label>
-              <input
-                className={inputClass}
-                placeholder="9876543210"
-                onChange={(e) =>
-                  setData({
-                    ...data,
-                    emergencyContactNo: e.target.value,
-                  })
-                }
-              />
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <input className={inputClass} placeholder="Student Mobile" onChange={(e) => setData({ ...data, studentMobileNo: e.target.value })} />
+            <input className={inputClass} placeholder="Email" onChange={(e) => setData({ ...data, email: e.target.value })} />
+            <input className={inputClass} placeholder="Father Phone" onChange={(e) => setData({ ...data, fatherPhoneNo: e.target.value })} />
+            <input className={inputClass} placeholder="Emergency Contact" onChange={(e) => setData({ ...data, emergencyContactNo: e.target.value })} />
           </div>
         </div>
 
         {/* EDUCATION */}
-        <div className="mb-8">
-          <h3 className="text-lg font-semibold mb-4 text-gray-800">
+        <div className="mb-10">
+          <h3 className="text-lg font-bold text-red-500 border-l-4 border-orange-400 pl-3 mb-5">
             Education Details
           </h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div>
-              <label className={labelClass}>School / College Name</label>
-              <input
-                className={inputClass}
-                placeholder="ABC College"
-                onChange={(e) =>
-                  setData({
-                    ...data,
-                    schoolCollegeName: e.target.value,
-                  })
-                }
-              />
-            </div>
-
-            <div>
-              <label className={labelClass}>Course / Class / Year</label>
-              <input
-                className={inputClass}
-                placeholder="BCA 1st Year"
-                onChange={(e) =>
-                  setData({
-                    ...data,
-                    courseClassYear: e.target.value,
-                  })
-                }
-              />
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <input className={inputClass} placeholder="School / College Name" onChange={(e) => setData({ ...data, schoolCollegeName: e.target.value })} />
+            <input className={inputClass} placeholder="Course / Class / Year" onChange={(e) => setData({ ...data, courseClassYear: e.target.value })} />
           </div>
         </div>
 
         {/* ADDRESS */}
-        <div className="mb-8">
-          <h3 className="text-lg font-semibold mb-4 text-gray-800">Address</h3>
+        <div className="mb-10">
+          <h3 className="text-lg font-bold text-red-500 border-l-4 border-orange-400 pl-3 mb-5">
+            Address
+          </h3>
 
-          <textarea
-            className={`${inputClass} h-24`}
-            placeholder="Permanent Address"
-            onChange={(e) =>
-              setData({
-                ...data,
-                permanentAddress: e.target.value,
-              })
-            }
-          />
+          <textarea className={`${inputClass} h-28`} placeholder="Permanent Address" onChange={(e) => setData({ ...data, permanentAddress: e.target.value })} />
         </div>
 
         {/* DOCUMENTS */}
-        <div className="mb-8">
-          <h3 className="text-lg font-semibold mb-4 text-gray-800">
+        <div className="mb-12">
+          <h3 className="text-lg font-bold text-red-500 border-l-4 border-orange-400 pl-3 mb-5">
             Upload Documents
           </h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div>
-              <label className={labelClass}>Passport Photo</label>
-              <input
-                type="file"
-                className={fileClass}
-                onChange={(e) =>
-                  setData({
-                    ...data,
-                    passportPhoto: e.target.files?.[0],
-                  })
-                }
-              />
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* PASSPORT PHOTO */}
+<div>
+  <label className={labelClass}>Passport Photo</label>
+  <input
+    type="file"
+    className={fileClass}
+    onChange={(e) =>
+      setData({ ...data, passportPhoto: e.target.files?.[0] })
+    }
+  />
+  {data.passportPhoto && (
+    <p className="mt-1 text-xs text-gray-600">
+      Selected: {data.passportPhoto.name}
+    </p>
+  )}
+</div>
 
-            <div>
-              <label className={labelClass}>ID Proof</label>
-              <input
-                type="file"
-                className={fileClass}
-                onChange={(e) =>
-                  setData({
-                    ...data,
-                    idProof: e.target.files?.[0],
-                  })
-                }
-              />
-            </div>
+{/* ID PROOF */}
+<div>
+  <label className={labelClass}>ID Proof</label>
+  <input
+    type="file"
+    className={fileClass}
+    onChange={(e) =>
+      setData({ ...data, idProof: e.target.files?.[0] })
+    }
+  />
+  {data.idProof && (
+    <p className="mt-1 text-xs text-gray-600">
+      Selected: {data.idProof.name}
+    </p>
+  )}
+</div>
 
-            <div>
-              <label className={labelClass}>Admission Proof</label>
-              <input
-                type="file"
-                className={fileClass}
-                onChange={(e) =>
-                  setData({
-                    ...data,
-                    admissionProof: e.target.files?.[0],
-                  })
-                }
-              />
-            </div>
+{/* ADMISSION PROOF */}
+<div>
+  <label className={labelClass}>Admission Proof</label>
+  <input
+    type="file"
+    className={fileClass}
+    onChange={(e) =>
+      setData({ ...data, admissionProof: e.target.files?.[0] })
+    }
+  />
+  {data.admissionProof && (
+    <p className="mt-1 text-xs text-gray-600">
+      Selected: {data.admissionProof.name}
+    </p>
+  )}
+</div>
 
-            <div>
-              <label className={labelClass}>Parent ID Proof</label>
-              <input
-                type="file"
-                className={fileClass}
-                onChange={(e) =>
-                  setData({
-                    ...data,
-                    parentIdProof: e.target.files?.[0],
-                  })
-                }
-              />
-            </div>
+{/* PARENT ID PROOF */}
+<div>
+  <label className={labelClass}>Parent ID Proof</label>
+  <input
+    type="file"
+    className={fileClass}
+    onChange={(e) =>
+      setData({ ...data, parentIdProof: e.target.files?.[0] })
+    }
+  />
+  {data.parentIdProof && (
+    <p className="mt-1 text-xs text-gray-600">
+      Selected: {data.parentIdProof.name}
+    </p>
+  )}
+</div>
+
           </div>
         </div>
 
@@ -302,7 +252,7 @@ export default function StudentForm({ id }: { id?: string }) {
         <button
           onClick={submit}
           disabled={loading}
-          className="w-full rounded-xl bg-blue-600 hover:bg-blue-700 text-white py-3 text-lg font-semibold transition disabled:opacity-50"
+          className="w-full py-4 rounded-2xl text-lg font-bold text-white bg-gradient-to-r from-orange-500 to-red-500 hover:scale-[1.02] transition-all disabled:opacity-60 shadow-lg"
         >
           {loading ? "Saving..." : id ? "Update Student" : "Add Student"}
         </button>

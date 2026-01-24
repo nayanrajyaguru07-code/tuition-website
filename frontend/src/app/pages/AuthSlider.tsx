@@ -4,6 +4,7 @@ import { useState, FormEvent } from "react";
 import { API } from "@/lib/api";
 import toast from "react-hot-toast";
 import { Loader2 } from "lucide-react";
+import Link from "next/link";
 
 export default function AuthSlider() {
   const [isRegister, setIsRegister] = useState(false);
@@ -102,6 +103,13 @@ export default function AuthSlider() {
                   "Login"
                 )}
               </button>
+
+
+              <Link href="/admin/login">
+              <button className="text-orange-600 font-semibold hover:underline"> 
+                admin login 
+              </button>
+              </Link>
 
               <p className="mt-4 text-sm text-center text-gray-600">
                 No account?{" "}

@@ -17,7 +17,7 @@ const app = express();
 
 (async () => {
   await wakeNeon(); // ⬅️ CRITICAL
-  initializeWhatsapp();
+  // initializeWhatsapp();
 })();
 
 // Middleware
