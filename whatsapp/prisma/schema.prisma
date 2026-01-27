@@ -1,0 +1,18 @@
+// 1. Define the database connection
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model WhatsappSession {
+  id        String   @id @default(cuid())
+  sessionId String   @unique
+  // IMPORTANT: Use @db.Text for Postgres to allow large strings
+  data      String   @db.Text 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
