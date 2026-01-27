@@ -5,9 +5,6 @@ import { useEffect, useState } from "react";
 import { Users, UserPlus, Briefcase, Wallet } from "lucide-react";
 import { API } from "@/lib/api";
 
-<<<<<<< HEAD
-import { API } from "@/lib/api";
-
 type Feature = {
   title: string;
   description: string;
@@ -16,12 +13,6 @@ type Feature = {
   bg: string;
   iconBg: string;
   glow: string;
-=======
-type Hostel = {
-  id: number;
-  hostelName: string;
-  email: string;
->>>>>>> d36795f386624f5b06d0f4105926117504ae97f9
 };
 
 const features = [
@@ -88,7 +79,6 @@ const features = [
     iconBg: "from-rose-400 to-rose-500",
     glow: "from-rose-300/40 to-rose-400/40",
   },
-<<<<<<< HEAD
  
 ];
 
@@ -109,7 +99,7 @@ export default function Home() {
       .catch((err) => console.error(err));
   }, []);
 
-  const visibleFeatures = adminFeatures.filter(
+  const visibleFeatures = features.filter(
     (f) => f.title !== "Dashboard" || isAdmin
   );
   
@@ -122,42 +112,9 @@ export default function Home() {
           </h1>
           <p className="text-gray-500 mt-2">
              Select an action to proceed with your daily tasks.
-=======
-];
-
-export default function Home() {
-  const [hostel, setHostel] = useState<Hostel | null>(null);
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      window.location.href = "/auth";
-      return;
-    }
-
-    API.get("/api/auth/me")
-      .then((res) => {
-        if (res.data?.hostel) {
-          setHostel(res.data.hostel);
-        }
-      })
-      .catch(console.error);
-  }, []);
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br  p-6 md:p-10">
-      {/* HEADER */}
-      <div className="max-w-7xl mx-auto mb-10">
-        <div className="rounded-2xl bg-gradient-to-r from-orange-400 to-red-500 p-8 text-white shadow-xl">
-          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
-            {hostel ? hostel.hostelName : "Welcome"}
-          </h1>
-          <p className="mt-1 text-white/90 text-sm md:text-base">
-            Manage your hostel — students, staff, fees, and expenses.
->>>>>>> d36795f386624f5b06d0f4105926117504ae97f9
           </p>
         </div>
-      </div>
+        
 
       {/* FEATURE GRID */}
       <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">

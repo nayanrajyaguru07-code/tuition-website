@@ -4,11 +4,8 @@ import { useState, FormEvent } from "react";
 import { API } from "@/lib/api";
 import toast from "react-hot-toast";
 import { Loader2 } from "lucide-react";
-<<<<<<< HEAD
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-=======
->>>>>>> d36795f386624f5b06d0f4105926117504ae97f9
 
 export default function AuthSlider() {
   const [activeView, setActiveView] = useState<"login" | "admin">("login");
@@ -184,12 +181,7 @@ export default function AuthSlider() {
                 )}
               </button>
 
-<<<<<<< HEAD
               <div className="mt-4 flex flex-col items-center gap-2">
-=======
-              <p className="mt-4 text-sm text-center text-gray-600">
-                No account?{" "}
->>>>>>> d36795f386624f5b06d0f4105926117504ae97f9
                 <button
                   type="button"
                   onClick={() => setActiveView("admin")}

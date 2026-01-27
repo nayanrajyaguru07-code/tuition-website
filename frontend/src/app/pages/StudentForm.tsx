@@ -31,11 +31,7 @@ export default function StudentForm({ id }: { id?: string }) {
   };
 
   const inputClass =
-<<<<<<< HEAD
     "w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-medium text-gray-700 focus:ring-2 focus:ring-orange-100 focus:border-orange-200 outline-none transition-all placeholder:text-gray-400";
-=======
-    "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500";
->>>>>>> d36795f386624f5b06d0f4105926117504ae97f9
 
   const labelClass = "text-sm font-medium text-gray-700";
 
@@ -94,7 +90,6 @@ export default function StudentForm({ id }: { id?: string }) {
               />
             </div>
 
-<<<<<<< HEAD
            <div>
               <label className={labelClass}>Gender</label>
               <SearchableSelect
@@ -119,16 +114,6 @@ export default function StudentForm({ id }: { id?: string }) {
   />
 </div>
 
-=======
-            <div>
-              <label className={labelClass}>Gender</label>
-              <input
-                className={inputClass}
-                placeholder="Male / Female"
-                onChange={(e) => setData({ ...data, gender: e.target.value })}
-              />
-            </div>
->>>>>>> d36795f386624f5b06d0f4105926117504ae97f9
 
             <div>
               <label className={labelClass}>Nationality</label>

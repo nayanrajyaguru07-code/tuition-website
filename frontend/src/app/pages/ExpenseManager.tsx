@@ -3,11 +3,8 @@
 import { useEffect, useState } from "react";
 import { API } from "@/lib/api";
 import toast from "react-hot-toast";
-<<<<<<< HEAD
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import SearchableSelect from "@/components/SearchableSelect";
-=======
->>>>>>> d36795f386624f5b06d0f4105926117504ae97f9
 
 type Expense = {
   id: number;
@@ -19,10 +16,15 @@ type Expense = {
   description: string | null;
 };
 
-export default function ExpenseManager() {
-  const [tab, setTab] = useState<"list" | "add" | "edit">("list");
+interface ExpenseManagerProps {
+  initialTab?: "list" | "add";
+}
+
+export default function ExpenseManager({ initialTab = "list" }: ExpenseManagerProps) {
+  const [tab, setTab] = useState<"list" | "add">(initialTab);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [showEditDialog, setShowEditDialog] = useState(false);
 
   const [form, setForm] = useState<any>({
     title: "",
@@ -34,11 +36,7 @@ export default function ExpenseManager() {
   });
 
   const inputClass =
-<<<<<<< HEAD
     "w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-medium text-gray-700 focus:ring-2 focus:ring-orange-100 focus:border-orange-200 outline-none transition-all placeholder:text-gray-400";
-=======
-    "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500";
->>>>>>> d36795f386624f5b06d0f4105926117504ae97f9
   const labelClass = "text-sm font-medium text-gray-700";
 
   const loadExpenses = async () => {
@@ -88,7 +86,7 @@ export default function ExpenseManager() {
       description: exp.description || "",
     });
     setSelectedId(exp.id);
-    setTab("edit");
+    setShowEditDialog(true);
   };
 
   const submitUpdate = async () => {
@@ -97,7 +95,7 @@ export default function ExpenseManager() {
     try {
       await API.put(`/api/expense/update-expense/${selectedId}`, form);
       toast.success("Expense updated");
-      setTab("list");
+      setShowEditDialog(false);
       loadExpenses();
     } catch {
       toast.error("Failed to update expense");
@@ -116,6 +114,9 @@ export default function ExpenseManager() {
     }
   };
 
+
+
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-lg p-8">
@@ -123,7 +124,7 @@ export default function ExpenseManager() {
 
         {/* TABS */}
         <div className="flex gap-3 mb-6">
-          {["list", "add", "edit"].map((t) => (
+          {["list", "add"].map((t) => (
             <button
               key={t}
               onClick={() => setTab(t as any)}
@@ -135,7 +136,6 @@ export default function ExpenseManager() {
             >
               {t === "list" && "All Expenses"}
               {t === "add" && "Add Expense"}
-              {t === "edit" && "Edit Expense"}
             </button>
           ))}
         </div>
@@ -251,18 +251,13 @@ export default function ExpenseManager() {
 
             <button
               onClick={submitAdd}
-<<<<<<< HEAD
               className="md:col-span-2 bg-orange-600 text-white py-3 rounded-xl hover:bg-orange-700 transition font-semibold"
-=======
-              className="md:col-span-2 bg-blue-600 text-white py-3 rounded-xl"
->>>>>>> d36795f386624f5b06d0f4105926117504ae97f9
             >
               Add Expense
             </button>
           </div>
         )}
 
-<<<<<<< HEAD
         {/* EDIT DIALOG */}
         <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
            <DialogContent>
@@ -337,32 +332,6 @@ export default function ExpenseManager() {
              </div>
            </DialogContent>
         </Dialog>
-=======
-        {/* EDIT */}
-        {tab === "edit" && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {Object.entries(form).map(([key, val]) => (
-              <div key={key}>
-                <label className={labelClass}>{key}</label>
-                <input
-                  name={key}
-                  value={val as any}
-                  type={key === "expenseDate" ? "date" : "text"}
-                  className={inputClass}
-                  onChange={handleChange}
-                />
-              </div>
-            ))}
-
-            <button
-              onClick={submitUpdate}
-              className="md:col-span-2 bg-green-600 text-white py-3 rounded-xl"
-            >
-              Update Expense
-            </button>
-          </div>
-        )}
->>>>>>> d36795f386624f5b06d0f4105926117504ae97f9
       </div>
     </div>
   );

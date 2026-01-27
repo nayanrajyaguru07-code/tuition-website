@@ -31,13 +31,8 @@ export default function StudentList() {
   );
 
   return (
-<<<<<<< HEAD
     <div className="min-h-screen p-6">
       <div className="max-w-7xl mx-auto">
-=======
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-6xl mx-auto">
->>>>>>> d36795f386624f5b06d0f4105926117504ae97f9
         {/* HEADER */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
           <h2 className="text-2xl font-bold text-gray-900">Students</h2>

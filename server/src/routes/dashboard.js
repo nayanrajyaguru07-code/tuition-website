@@ -152,4 +152,48 @@ dashboardRouter.get("/stats/current-month-recovery", async (req, res) => {
   }
 });
 
+// ==========================
+// 4. STUDENT & STAFF DETAILS
+// ==========================
+dashboardRouter.get("/details/students", async (req, res) => {
+  try {
+    // const hostelId = req.user.id;
+    const hostelId = 1;
+
+    // Fetch students with their hostel name
+    const students = await Prisma.student.findMany({
+      where: { hostelId },
+      include: {
+        hostel: {
+          select: { hostelName: true },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    res.status(200).json({ students });
+  } catch (error) {
+    console.error("Dashboard Student Details Error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+dashboardRouter.get("/details/staff", async (req, res) => {
+  try {
+    // const hostelId = req.user.id;
+    const hostelId = 1;
+
+    // Fetch staff
+    const staff = await Prisma.employee.findMany({
+      where: { hostelId },
+      orderBy: { dateOfJoining: "desc" },
+    });
+
+    res.status(200).json({ staff });
+  } catch (error) {
+    console.error("Dashboard Staff Details Error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 export default dashboardRouter;
