@@ -16,13 +16,16 @@ type Employee = {
   salary: string;
   dateOfJoining: string;
   photoUrl: string;
+  idProofUrl?: string;
 };
 
 type EmployeeManagerProps = {
   initialTab?: "list" | "add" | "edit";
 };
 
-export default function EmployeeManager({ initialTab = "list" }: EmployeeManagerProps) {
+export default function EmployeeManager({
+  initialTab = "list",
+}: EmployeeManagerProps) {
   const [tab, setTab] = useState<"list" | "add" | "edit">(initialTab);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -37,7 +40,8 @@ export default function EmployeeManager({ initialTab = "list" }: EmployeeManager
     role: "",
     salary: "",
     dateOfJoining: "",
-    photo: null,
+    passportPhoto: null,
+    idProof: null,
   });
 
   const inputClass =
@@ -187,21 +191,37 @@ export default function EmployeeManager({ initialTab = "list" }: EmployeeManager
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
               <label className={labelClass}>Name</label>
-              <input name="name" className={inputClass} onChange={handleChange} />
+              <input
+                name="name"
+                className={inputClass}
+                onChange={handleChange}
+              />
             </div>
             <div>
               <label className={labelClass}>Email</label>
-              <input name="email" className={inputClass} onChange={handleChange} />
+              <input
+                name="email"
+                className={inputClass}
+                onChange={handleChange}
+              />
             </div>
             <div>
               <label className={labelClass}>Phone</label>
-              <input name="phone" className={inputClass} onChange={handleChange} />
+              <input
+                name="phone"
+                className={inputClass}
+                onChange={handleChange}
+              />
             </div>
             <div>
               <label className={labelClass}>Address</label>
-              <input name="address" className={inputClass} onChange={handleChange} />
+              <input
+                name="address"
+                className={inputClass}
+                onChange={handleChange}
+              />
             </div>
-            
+
             <div>
               <label className={labelClass}>Gender</label>
               <SearchableSelect
@@ -211,29 +231,31 @@ export default function EmployeeManager({ initialTab = "list" }: EmployeeManager
                   { value: "Other", label: "Other" },
                 ]}
                 value={form.gender}
-                onChange={(val) => handleChange({ target: { name: "gender", value: val } })}
+                onChange={(val) =>
+                  handleChange({ target: { name: "gender", value: val } })
+                }
                 placeholder="Select Gender"
               />
             </div>
 
             <div>
               <label className={labelClass}>Role</label>
-              <SearchableSelect
-                options={[
-                  { value: "Admin", label: "Admin" },
-                  { value: "Teacher", label: "Teacher" },
-                  { value: "Staff", label: "Staff" },
-                  { value: "Driver", label: "Driver" },
-                ]}
+              <input
+                name="role"
                 value={form.role}
-                onChange={(val) => handleChange({ target: { name: "role", value: val } })}
-                placeholder="Select Role"
+                className={inputClass}
+                onChange={handleChange}
+                placeholder="Enter Role"
               />
             </div>
 
             <div>
               <label className={labelClass}>Salary</label>
-              <input name="salary" className={inputClass} onChange={handleChange} />
+              <input
+                name="salary"
+                className={inputClass}
+                onChange={handleChange}
+              />
             </div>
 
             <div>
@@ -247,10 +269,20 @@ export default function EmployeeManager({ initialTab = "list" }: EmployeeManager
             </div>
 
             <div>
-              <label className={labelClass}>Photo</label>
+              <label className={labelClass}>Passport Photo</label>
               <input
                 type="file"
-                name="photo"
+                name="passportPhoto"
+                className={inputClass}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div>
+              <label className={labelClass}>ID Proof</label>
+              <input
+                type="file"
+                name="idProof"
                 className={inputClass}
                 onChange={handleChange}
               />
@@ -271,19 +303,39 @@ export default function EmployeeManager({ initialTab = "list" }: EmployeeManager
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
               <label className={labelClass}>Name</label>
-              <input name="name" value={form.name} className={inputClass} onChange={handleChange} />
+              <input
+                name="name"
+                value={form.name}
+                className={inputClass}
+                onChange={handleChange}
+              />
             </div>
             <div>
               <label className={labelClass}>Email</label>
-              <input name="email" value={form.email} className={inputClass} onChange={handleChange} />
+              <input
+                name="email"
+                value={form.email}
+                className={inputClass}
+                onChange={handleChange}
+              />
             </div>
             <div>
               <label className={labelClass}>Phone</label>
-              <input name="phone" value={form.phone} className={inputClass} onChange={handleChange} />
+              <input
+                name="phone"
+                value={form.phone}
+                className={inputClass}
+                onChange={handleChange}
+              />
             </div>
             <div>
               <label className={labelClass}>Address</label>
-              <input name="address" value={form.address} className={inputClass} onChange={handleChange} />
+              <input
+                name="address"
+                value={form.address}
+                className={inputClass}
+                onChange={handleChange}
+              />
             </div>
 
             <div>
@@ -295,29 +347,32 @@ export default function EmployeeManager({ initialTab = "list" }: EmployeeManager
                   { value: "Other", label: "Other" },
                 ]}
                 value={form.gender}
-                onChange={(val) => handleChange({ target: { name: "gender", value: val } })}
+                onChange={(val) =>
+                  handleChange({ target: { name: "gender", value: val } })
+                }
                 placeholder="Select Gender"
               />
             </div>
 
             <div>
               <label className={labelClass}>Role</label>
-              <SearchableSelect
-                options={[
-                  { value: "Admin", label: "Admin" },
-                  { value: "Teacher", label: "Teacher" },
-                  { value: "Staff", label: "Staff" },
-                  { value: "Driver", label: "Driver" },
-                ]}
+              <input
+                name="role"
                 value={form.role}
-                onChange={(val) => handleChange({ target: { name: "role", value: val } })}
-                placeholder="Select Role"
+                className={inputClass}
+                onChange={handleChange}
+                placeholder="Enter Role"
               />
             </div>
 
             <div>
               <label className={labelClass}>Salary</label>
-              <input name="salary" value={form.salary} className={inputClass} onChange={handleChange} />
+              <input
+                name="salary"
+                value={form.salary}
+                className={inputClass}
+                onChange={handleChange}
+              />
             </div>
 
             <div>
@@ -325,17 +380,31 @@ export default function EmployeeManager({ initialTab = "list" }: EmployeeManager
               <input
                 type="date"
                 name="dateOfJoining"
-                value={form.dateOfJoining ? new Date(form.dateOfJoining).toISOString().split('T')[0] : ''}
+                value={
+                  form.dateOfJoining
+                    ? new Date(form.dateOfJoining).toISOString().split("T")[0]
+                    : ""
+                }
                 className={inputClass}
                 onChange={handleChange}
               />
             </div>
 
             <div className="md:col-span-2">
-              <label className={labelClass}>Photo</label>
+              <label className={labelClass}>Passport Photo</label>
               <input
                 type="file"
-                name="photo"
+                name="passportPhoto"
+                className={`${inputClass} bg-white`}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className={labelClass}>ID Proof</label>
+              <input
+                type="file"
+                name="idProof"
                 className={`${inputClass} bg-white`}
                 onChange={handleChange}
               />

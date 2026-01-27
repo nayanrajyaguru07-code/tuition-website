@@ -1,13 +1,39 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { API } from "@/lib/api";
 import toast from "react-hot-toast";
 import SearchableSelect from "@/components/SearchableSelect";
 
-export default function StudentForm({ id }: { id?: string }) {
+export default function StudentForm({
+  id,
+  onSuccess,
+}: {
+  id?: string;
+  onSuccess?: () => void;
+}) {
   const [data, setData] = useState<any>({});
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (id) {
+      setLoading(true);
+      API.get(`/api/student/get-student/${id}`)
+        .then((res) => {
+          const student = res.data.student;
+          // Format date for input type="date"
+          if (student.dob) {
+            student.dob = new Date(student.dob).toISOString().split("T")[0];
+          }
+          setData(student);
+        })
+        .catch((err) => {
+          console.error("Failed to fetch student", err);
+          toast.error("Failed to load student details");
+        })
+        .finally(() => setLoading(false));
+    }
+  }, [id]);
 
   const submit = async () => {
     try {
@@ -22,6 +48,8 @@ export default function StudentForm({ id }: { id?: string }) {
         await API.post("/api/student/add-student", formData);
         toast.success("Student added successfully");
       }
+
+      if (onSuccess) onSuccess();
     } catch (err) {
       console.error(err);
       toast.error("Failed to save student");
@@ -39,8 +67,8 @@ export default function StudentForm({ id }: { id?: string }) {
     "block w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer";
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-8">
+    <div className="p-1">
+      <div className="bg-white rounded-2xl p-0 md:p-2">
         <h2 className="text-2xl font-bold mb-6 text-gray-900">
           {id ? "Update Student" : "Add New Student"}
         </h2>
@@ -57,6 +85,7 @@ export default function StudentForm({ id }: { id?: string }) {
               <input
                 className={inputClass}
                 placeholder="John Doe"
+                value={data.fullName || ""}
                 onChange={(e) => setData({ ...data, fullName: e.target.value })}
               />
             </div>
@@ -66,6 +95,7 @@ export default function StudentForm({ id }: { id?: string }) {
               <input
                 className={inputClass}
                 placeholder="Mr. Doe"
+                value={data.fatherName || ""}
                 onChange={(e) =>
                   setData({ ...data, fatherName: e.target.value })
                 }
@@ -77,6 +107,7 @@ export default function StudentForm({ id }: { id?: string }) {
               <input
                 type="date"
                 className={inputClass}
+                value={data.dob || ""}
                 onChange={(e) => setData({ ...data, dob: e.target.value })}
               />
             </div>
@@ -86,11 +117,12 @@ export default function StudentForm({ id }: { id?: string }) {
               <input
                 className={inputClass}
                 placeholder="18"
+                value={data.age || ""}
                 onChange={(e) => setData({ ...data, age: e.target.value })}
               />
             </div>
 
-           <div>
+            <div>
               <label className={labelClass}>Gender</label>
               <SearchableSelect
                 options={[
@@ -98,28 +130,18 @@ export default function StudentForm({ id }: { id?: string }) {
                   { value: "Female", label: "Female" },
                   { value: "Other", label: "Other" },
                 ]}
-                value={data.gender}
+                value={data.gender || ""}
                 onChange={(val) => setData({ ...data, gender: val })}
                 placeholder="Select Gender"
               />
             </div>
-
-
-         <div>
-  <label className={labelClass}>Nationality</label>
-  <input
-    className={inputClass}
-    value={data.nationality}
-    onChange={(e) => setData({ ...data, nationality: e.target.value })}
-  />
-</div>
-
 
             <div>
               <label className={labelClass}>Nationality</label>
               <input
                 className={inputClass}
                 placeholder="Indian"
+                value={data.nationality || ""}
                 onChange={(e) =>
                   setData({ ...data, nationality: e.target.value })
                 }
@@ -131,6 +153,7 @@ export default function StudentForm({ id }: { id?: string }) {
               <input
                 className={inputClass}
                 placeholder="General / OBC / SC / ST"
+                value={data.category || ""}
                 onChange={(e) => setData({ ...data, category: e.target.value })}
               />
             </div>
@@ -149,6 +172,7 @@ export default function StudentForm({ id }: { id?: string }) {
               <input
                 className={inputClass}
                 placeholder="9876543210"
+                value={data.studentMobileNo || ""}
                 onChange={(e) =>
                   setData({
                     ...data,
@@ -163,6 +187,7 @@ export default function StudentForm({ id }: { id?: string }) {
               <input
                 className={inputClass}
                 placeholder="student@example.com"
+                value={data.email || ""}
                 onChange={(e) => setData({ ...data, email: e.target.value })}
               />
             </div>
@@ -172,6 +197,7 @@ export default function StudentForm({ id }: { id?: string }) {
               <input
                 className={inputClass}
                 placeholder="9876543210"
+                value={data.fatherPhoneNo || ""}
                 onChange={(e) =>
                   setData({
                     ...data,
@@ -186,6 +212,7 @@ export default function StudentForm({ id }: { id?: string }) {
               <input
                 className={inputClass}
                 placeholder="9876543210"
+                value={data.emergencyContactNo || ""}
                 onChange={(e) =>
                   setData({
                     ...data,
@@ -209,6 +236,7 @@ export default function StudentForm({ id }: { id?: string }) {
               <input
                 className={inputClass}
                 placeholder="ABC College"
+                value={data.schoolCollegeName || ""}
                 onChange={(e) =>
                   setData({
                     ...data,
@@ -223,6 +251,7 @@ export default function StudentForm({ id }: { id?: string }) {
               <input
                 className={inputClass}
                 placeholder="BCA 1st Year"
+                value={data.courseClassYear || ""}
                 onChange={(e) =>
                   setData({
                     ...data,
@@ -241,6 +270,7 @@ export default function StudentForm({ id }: { id?: string }) {
           <textarea
             className={`${inputClass} h-24`}
             placeholder="Permanent Address"
+            value={data.permanentAddress || ""}
             onChange={(e) =>
               setData({
                 ...data,

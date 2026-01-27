@@ -2,11 +2,12 @@ import express from "express";
 // Correct router initialization
 const expenseRouter = express.Router();
 import Prisma from "../lib/prisma.js";
+import authMiddleware from "../middleware/authMiddleware.js";
 
 // ==========================
 // 1. ADD EXPENSE (POST)
 // ==========================
-expenseRouter.post("/add-expense", async (req, res) => {
+expenseRouter.post("/add-expense", authMiddleware, async (req, res) => {
   try {
     // const hostelId = req.user.id;
     const hostelId = 1;
@@ -47,10 +48,10 @@ expenseRouter.post("/add-expense", async (req, res) => {
 // 2. LIST EXPENSES (GET)
 // ==========================
 // Returns a lightweight list for the dashboard/table
-expenseRouter.get("/all-expenses", async (req, res) => {
+expenseRouter.get("/all-expenses", authMiddleware, async (req, res) => {
   try {
-    // const hostelId = req.user.id;
-    const hostelId = 1;
+    const hostelId = req.user.id;
+    // const hostelId = 1;
 
     const expenses = await Prisma.expense.findMany({
       where: { hostelId: hostelId },
@@ -80,10 +81,10 @@ expenseRouter.get("/all-expenses", async (req, res) => {
 // 3. EXPENSE DETAILS (GET)
 // ==========================
 // Returns full details for a single expense
-expenseRouter.get("/expense-details/:id", async (req, res) => {
+expenseRouter.get("/expense-details/:id", authMiddleware, async (req, res) => {
   try {
-    // const hostelId = req.user.id;
-    const hostelId = 1;
+    const hostelId = req.user.id;
+    // const hostelId = 1;
 
     const expenseId = parseInt(req.params.id);
 
@@ -112,10 +113,10 @@ expenseRouter.get("/expense-details/:id", async (req, res) => {
 // ==========================
 // 4. UPDATE EXPENSE (PUT)
 // ==========================
-expenseRouter.put("/update-expense/:id", async (req, res) => {
+expenseRouter.put("/update-expense/:id", authMiddleware, async (req, res) => {
   try {
-    // const hostelId = req.user.id;
-    const hostelId = 1;
+    const hostelId = req.user.id;
+    // const hostelId = 1;
 
     const expenseId = parseInt(req.params.id);
     const { title, amount, expenseDate, category, paymentMethod, description } =
@@ -160,34 +161,38 @@ expenseRouter.put("/update-expense/:id", async (req, res) => {
 // ==========================
 // 5. DELETE EXPENSE (DELETE)
 // ==========================
-expenseRouter.delete("/delete-expense/:id", async (req, res) => {
-  try {
-    // const hostelId = req.user.id;
-    const hostelId = 1;
+expenseRouter.delete(
+  "/delete-expense/:id",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const hostelId = req.user.id;
+      // const hostelId = 1;
 
-    const expenseId = parseInt(req.params.id);
+      const expenseId = parseInt(req.params.id);
 
-    // 1. Verify Existence & Ownership
-    const existingExpense = await Prisma.expense.findFirst({
-      where: { id: expenseId, hostelId: hostelId },
-    });
+      // 1. Verify Existence & Ownership
+      const existingExpense = await Prisma.expense.findFirst({
+        where: { id: expenseId, hostelId: hostelId },
+      });
 
-    if (!existingExpense) {
-      return res
-        .status(404)
-        .json({ message: "Expense not found or access denied" });
+      if (!existingExpense) {
+        return res
+          .status(404)
+          .json({ message: "Expense not found or access denied" });
+      }
+
+      // 2. Delete
+      await Prisma.expense.delete({
+        where: { id: expenseId },
+      });
+
+      res.status(200).json({ message: "Expense deleted successfully" });
+    } catch (error) {
+      console.error("Delete Expense Error:", error);
+      res.status(500).json({ message: "Internal server error" });
     }
-
-    // 2. Delete
-    await Prisma.expense.delete({
-      where: { id: expenseId },
-    });
-
-    res.status(200).json({ message: "Expense deleted successfully" });
-  } catch (error) {
-    console.error("Delete Expense Error:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-});
+  },
+);
 
 export default expenseRouter;

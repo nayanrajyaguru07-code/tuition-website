@@ -13,14 +13,16 @@ API.interceptors.request.use(
     // ⚠ Prevent SSR crash
     if (typeof window !== "undefined") {
       const token = localStorage.getItem("token");
+      const url = config.url || "";
 
       // ⛔ Don't attach token to auth routes
       const isAuthRoute =
-        config.url?.includes("/login") ||
-        config.url?.includes("/register") ||
-        config.url?.includes("/auth");
+        url.includes("/login") ||
+        url.includes("/register") ||
+        url.includes("/auth");
 
       if (token && !isAuthRoute) {
+        config.headers = config.headers || {};
         config.headers.Authorization = `Bearer ${token}`;
       }
     }
@@ -39,7 +41,7 @@ API.interceptors.response.use(
     if (typeof window !== "undefined") {
       if (error.response?.status === 401) {
         // 🔐 Auto logout on token expiry
-        localStorage.clear();
+        localStorage.removeItem("token"); // safer than clear()
         window.location.href = "/auth";
       }
     }

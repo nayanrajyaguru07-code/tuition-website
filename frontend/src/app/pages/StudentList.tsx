@@ -3,6 +3,14 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { API } from "@/lib/api";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import StudentForm from "./StudentForm";
+import StudentView from "./StudentView";
 
 type Student = {
   id: number;
@@ -17,11 +25,20 @@ export default function StudentList() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  // Dialog State
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [viewId, setViewId] = useState<string | null>(null);
+
+  const fetchStudents = () => {
+    setLoading(true);
     API.get("/api/student/all-students")
       .then((res) => setStudents(res.data.students))
       .catch(console.error)
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchStudents();
   }, []);
 
   const filtered = students.filter(
@@ -46,12 +63,12 @@ export default function StudentList() {
               className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
 
-            <Link
-              href="/students/add"
+            <button
+              onClick={() => setEditingId("new")}
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
             >
               + Add Student
-            </Link>
+            </button>
           </div>
         </div>
 
@@ -91,24 +108,62 @@ export default function StudentList() {
                 </div>
 
                 <div className="mt-auto flex gap-3">
-                  <Link
-                    href={`/students/${s.id}`}
+                  <button
+                    onClick={() => setEditingId(String(s.id))}
                     className="flex-1 text-center bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-medium"
                   >
                     Edit
-                  </Link>
+                  </button>
 
-                  <Link
-                    href={`/students/${s.id}`}
+                  <button
+                    onClick={() => setViewId(String(s.id))}
                     className="flex-1 text-center border border-gray-300 hover:bg-gray-100 py-2 rounded-lg text-sm font-medium"
                   >
                     View
-                  </Link>
+                  </button>
                 </div>
               </div>
             ))}
           </div>
         )}
+
+        {/* EDIT / ADD DIALOG */}
+        <Dialog
+          open={!!editingId}
+          onOpenChange={(open) => !open && setEditingId(null)}
+        >
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>
+                {editingId === "new" ? "Add New Student" : "Update Student"}
+              </DialogTitle>
+            </DialogHeader>
+            {editingId && (
+              <StudentForm
+                id={editingId === "new" ? undefined : editingId}
+                key={editingId}
+                isDialog={true}
+                onSuccess={() => {
+                  setEditingId(null);
+                  fetchStudents();
+                }}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* VIEW DIALOG */}
+        <Dialog
+          open={!!viewId}
+          onOpenChange={(open) => !open && setViewId(null)}
+        >
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle>Student Details</DialogTitle>
+            </DialogHeader>
+            {viewId && <StudentView id={viewId} />}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

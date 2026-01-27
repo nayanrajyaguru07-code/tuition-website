@@ -3,76 +3,107 @@ import multer from "multer";
 import fs from "fs";
 import Prisma from "../lib/prisma.js";
 import { uploadImage, deleteImage } from "../utils/uploadImage.js";
+import authMiddleware from "../middleware/authMiddleware.js";
 
 const employeeRouter = express.Router();
 
 // Multer Setup for temporary storage
 const upload = multer({ dest: "uploads/" });
 
+const uploadFields = upload.fields([
+  { name: "passportPhoto", maxCount: 1 },
+  { name: "idProof", maxCount: 1 },
+]);
+
 // ==========================
 // 1. ADD STAFF (POST)
 // ==========================
-employeeRouter.post("/add-staff", upload.single("photo"), async (req, res) => {
-  try {
-    // const hostelId = req.user.id;
-    const hostelId = 1;
+employeeRouter.post(
+  "/add-staff",
+  authMiddleware,
+  uploadFields,
+  async (req, res) => {
+    try {
+      const hostelId = req.user.id;
+      // const hostelId = 1;
 
-    const { name, email, phone, address, gender, role, salary, dateOfJoining } =
-      req.body;
-
-    // 1. Validation
-    if (!name || !phone || !role) {
-      return res
-        .status(400)
-        .json({ message: "Name, Phone, and Role are required" });
-    }
-
-    // 2. Image Upload (if provided)
-    let photoUrl = null;
-    if (req.file) {
-      try {
-        photoUrl = await uploadImage(req.file.path);
-        // Clean up local file
-        fs.unlink(req.file.path, () => {});
-      } catch (err) {
-        console.error("Image upload failed:", err);
-      }
-    }
-
-    // 3. Create Employee
-    const newEmployee = await Prisma.employee.create({
-      data: {
-        hostelId: hostelId,
+      const {
         name,
-        email: email || null,
+        email,
         phone,
-        address: address || null,
-        gender: gender || null,
+        address,
+        gender,
         role,
-        salary: salary ? parseFloat(salary) : null,
-        dateOfJoining: dateOfJoining ? new Date(dateOfJoining) : new Date(),
-        photoUrl: photoUrl,
-      },
-    });
+        salary,
+        dateOfJoining,
+      } = req.body;
 
-    res.status(201).json({
-      message: "Staff member added successfully",
-      employee: newEmployee,
-    });
-  } catch (error) {
-    console.error("Add Staff Error:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-});
+      // 1. Validation
+      if (!name || !phone || !role) {
+        return res
+          .status(400)
+          .json({ message: "Name, Phone, and Role are required" });
+      }
+
+      // 2. Image Upload (if provided)
+      let photoUrl = null;
+      if (req.files.passportPhoto) {
+        try {
+          photoUrl = await uploadImage(req.files.passportPhoto[0].path);
+          // Clean up local file
+          fs.unlink(req.files.passportPhoto[0].path, () => {});
+        } catch (err) {
+          console.error("Image upload failed:", err);
+        }
+      }
+
+      let idProofUrl = null;
+      if (req.files.idProof) {
+        try {
+          idProofUrl = await uploadImage(req.files.idProof[0].path);
+          // Clean up local file
+          fs.unlink(req.files.idProof[0].path, () => {});
+        } catch (err) {
+          console.error("Image upload failed:", err);
+        }
+      }
+
+      // 3. Create Employee
+      const newEmployee = await Prisma.employee.create({
+        data: {
+          hostelId: hostelId,
+          name,
+          email: email || null,
+          phone,
+          address: address || null,
+          gender: gender || null,
+          role,
+          salary: salary ? parseFloat(salary) : null,
+          dateOfJoining: dateOfJoining ? new Date(dateOfJoining) : new Date(),
+          photoUrl: photoUrl,
+          idProofUrl: idProofUrl,
+        },
+      });
+
+      res.status(201).json({
+        message: "Staff member added successfully",
+        employee: newEmployee,
+      });
+    } catch (error) {
+      console.error("Add Staff Error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  },
+);
 
 // ==========================
 // 2. LIST OF STAFF (GET)
 // ==========================
 // Returns a lightweight list for your dashboard
-employeeRouter.get("/all-staff", async (req, res) => {
+employeeRouter.get("/all-staff", authMiddleware, async (req, res) => {
   try {
-    // const hostelId = req.user.id;
-    const hostelId = 1;
+    const hostelId = req.user.id;
+    // const hostelId = 1;
 
     const staffList = await Prisma.employee.findMany({
       where: { hostelId: hostelId },
@@ -102,10 +133,10 @@ employeeRouter.get("/all-staff", async (req, res) => {
 // 3. STAFF DETAILS (GET)
 // ==========================
 // Returns full profile of one employee
-employeeRouter.get("/staff-details/:id", async (req, res) => {
+employeeRouter.get("/staff-details/:id", authMiddleware, async (req, res) => {
   try {
-    // const hostelId = req.user.id;
-    const hostelId = 1;
+    const hostelId = req.user.id;
+    // const hostelId = 1;
 
     const staffId = parseInt(req.params.id);
 
@@ -132,11 +163,12 @@ employeeRouter.get("/staff-details/:id", async (req, res) => {
 // ==========================
 employeeRouter.put(
   "/update-staff/:id",
-  upload.single("photo"),
+  authMiddleware,
+  uploadFields,
   async (req, res) => {
     try {
-      // const hostelId = req.user.id;
-      const hostelId = 1;
+      const hostelId = req.user.id;
+      // const hostelId = 1;
 
       const staffId = parseInt(req.params.id);
 
@@ -151,9 +183,15 @@ employeeRouter.put(
 
       // 2. Handle Image Upload
       let newPhotoUrl = null;
-      if (req.file) {
-        newPhotoUrl = await uploadImage(req.file.path);
-        fs.unlink(req.file.path, () => {});
+      if (req.files.passportPhoto) {
+        newPhotoUrl = await uploadImage(req.files.passportPhoto[0].path);
+        fs.unlink(req.files.passportPhoto[0].path, () => {});
+      }
+
+      let newIdProofUrl = null;
+      if (req.files.idProof) {
+        newIdProofUrl = await uploadImage(req.files.idProof[0].path);
+        fs.unlink(req.files.idProof[0].path, () => {});
       }
 
       // 3. Prepare Update Data
@@ -178,6 +216,7 @@ employeeRouter.put(
       if (salary) updateData.salary = parseFloat(salary);
       if (dateOfJoining) updateData.dateOfJoining = new Date(dateOfJoining);
       if (newPhotoUrl) updateData.photoUrl = newPhotoUrl; // Only update if new photo exists
+      if (newIdProofUrl) updateData.idProofUrl = newIdProofUrl; // Only update if new ID proof exists
 
       // 4. Update DB
       const updatedStaff = await Prisma.employee.update({
@@ -199,10 +238,10 @@ employeeRouter.put(
 // ==========================
 // 5. DELETE STAFF (DELETE)
 // ==========================
-employeeRouter.delete("/delete-staff/:id", async (req, res) => {
+employeeRouter.delete("/delete-staff/:id", authMiddleware, async (req, res) => {
   try {
-    // const hostelId = req.user.id;
-    const hostelId = 1;
+    const hostelId = req.user.id;
+    // const hostelId = 1;
 
     const staffId = parseInt(req.params.id);
 

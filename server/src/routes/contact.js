@@ -1,13 +1,14 @@
 import express from "express";
 import Prisma from "../lib/prisma.js";
+import authMiddleware from "../middleware/authMiddleware.js";
 
 const contactRouter = express.Router();
 
 // GET /api/contacts/all
-contactRouter.get("/all", async (req, res) => {
+contactRouter.get("/all", authMiddleware, async (req, res) => {
   try {
-    // const hostelId = req.user.id;
-    const hostelId = 1;
+    const hostelId = req.user.id;
+    // const hostelId = 1;
 
     // 1. Fetch Students (Student & Parent data comes from here)
     const students = await Prisma.student.findMany({

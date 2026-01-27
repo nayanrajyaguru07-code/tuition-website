@@ -7,13 +7,16 @@ import Prisma from "../lib/prisma.js";
 // ==========================
 dashboardRouter.get("/stats/counts", async (req, res) => {
   try {
-    // const hostelId = req.user.id;
-    const hostelId = 1;
+    const { hostelId } = req.query;
+    const where = {};
 
-    // Run queries in parallel for speed
+    if (hostelId && hostelId !== "all") {
+      where.hostelId = parseInt(hostelId);
+    }
+
     const [studentCount, staffCount] = await Promise.all([
-      Prisma.student.count({ where: { hostelId } }),
-      Prisma.employee.count({ where: { hostelId } }),
+      Prisma.student.count({ where }),
+      Prisma.employee.count({ where }),
     ]);
 
     res.status(200).json({
@@ -31,35 +34,39 @@ dashboardRouter.get("/stats/counts", async (req, res) => {
 // ==========================
 dashboardRouter.get("/stats/monthly-finance", async (req, res) => {
   try {
-    // const hostelId = req.user.id;
-    const hostelId = 1;
-
-    // 1. Define Date Range (e.g., Start of current year or last 6 months)
-    // For simplicity, let's fetch all data for the current year
+    const { hostelId } = req.query;
     const currentYear = new Date().getFullYear();
     const startDate = new Date(`${currentYear}-01-01`);
 
-    // 2. Fetch Data
+    const where = {};
+    if (hostelId && hostelId !== "all") {
+      where.hostelId = parseInt(hostelId);
+    }
+
     const [feeCollections, salaryPayments, expenses] = await Promise.all([
-      // Income
       Prisma.feeCollection.findMany({
-        where: { hostelId, paymentDate: { gte: startDate } },
+        where: {
+          ...where,
+          paymentDate: { gte: startDate },
+        },
         select: { amount: true, paymentDate: true },
       }),
-      // Expense 1: Salaries
       Prisma.salaryPayment.findMany({
-        where: { hostelId, paymentDate: { gte: startDate } },
+        where: {
+          ...where,
+          paymentDate: { gte: startDate },
+        },
         select: { amount: true, paymentDate: true },
       }),
-      // Expense 2: General Expenses
       Prisma.expense.findMany({
-        where: { hostelId, expenseDate: { gte: startDate } },
+        where: {
+          ...where,
+          expenseDate: { gte: startDate },
+        },
         select: { amount: true, expenseDate: true },
       }),
     ]);
 
-    // 3. Aggregate Data by Month in JavaScript
-    // Helper to get "Jan 2026" key
     const getMonthKey = (date) => {
       const d = new Date(date);
       return d.toLocaleString("default", { month: "short", year: "numeric" });
@@ -67,29 +74,24 @@ dashboardRouter.get("/stats/monthly-finance", async (req, res) => {
 
     const monthlyData = {};
 
-    // Process Income (Fees)
     feeCollections.forEach((record) => {
       const key = getMonthKey(record.paymentDate);
       if (!monthlyData[key]) monthlyData[key] = { income: 0, expense: 0 };
       monthlyData[key].income += record.amount;
     });
 
-    // Process Expenses (Salaries)
     salaryPayments.forEach((record) => {
       const key = getMonthKey(record.paymentDate);
       if (!monthlyData[key]) monthlyData[key] = { income: 0, expense: 0 };
       monthlyData[key].expense += record.amount;
     });
 
-    // Process Expenses (General)
     expenses.forEach((record) => {
       const key = getMonthKey(record.expenseDate);
       if (!monthlyData[key]) monthlyData[key] = { income: 0, expense: 0 };
       monthlyData[key].expense += record.amount;
     });
 
-    // 4. Convert Object to Array for Frontend Chart
-    // e.g. [{ month: "Jan 2026", income: 5000, expense: 2000 }, ...]
     const chartData = Object.keys(monthlyData).map((month) => ({
       month,
       income: monthlyData[month].income,
@@ -109,31 +111,47 @@ dashboardRouter.get("/stats/monthly-finance", async (req, res) => {
 // Shows how much fee is collected vs pending for the CURRENT MONTH only
 dashboardRouter.get("/stats/current-month-recovery", async (req, res) => {
   try {
-    // const hostelId = req.user.id;
-    const hostelId = 1;
+    const { hostelId } = req.query;
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
-    // 1. Total Collectable (Total Students * Fee per Student)
-    const hostel = await Prisma.hostel.findUnique({
-      where: { id: hostelId },
-      include: { _count: { select: { students: true } } },
-    });
+    let expectedRevenue = 0;
 
-    const totalStudents = hostel._count.students;
-    const feePerStudent = hostel.fee || 0;
-    const expectedRevenue = totalStudents * feePerStudent;
+    // Calculate Expected Revenue
+    if (hostelId && hostelId !== "all") {
+      const hId = parseInt(hostelId);
+      const hostel = await Prisma.hostel.findUnique({
+        where: { id: hId },
+        include: { _count: { select: { students: true } } },
+      });
+      if (hostel) {
+        expectedRevenue = (hostel._count.students || 0) * (hostel.fee || 0);
+      }
+    } else {
+      // Aggregate for ALL hostels
+      const hostels = await Prisma.hostel.findMany({
+        include: { _count: { select: { students: true } } },
+      });
+      expectedRevenue = hostels.reduce(
+        (sum, h) => sum + (h._count.students || 0) * (h.fee || 0),
+        0,
+      );
+    }
 
-    // 2. Actually Collected This Month
-    const collectedThisMonth = await Prisma.feeCollection.aggregate({
-      where: {
-        hostelId,
-        paymentDate: {
-          gte: startOfMonth,
-          lte: endOfMonth,
-        },
+    // Calculate Collected
+    const where = {
+      paymentDate: {
+        gte: startOfMonth,
+        lte: endOfMonth,
       },
+    };
+    if (hostelId && hostelId !== "all") {
+      where.hostelId = parseInt(hostelId);
+    }
+
+    const collectedThisMonth = await Prisma.feeCollection.aggregate({
+      where,
       _sum: { amount: true },
     });
 
@@ -157,12 +175,14 @@ dashboardRouter.get("/stats/current-month-recovery", async (req, res) => {
 // ==========================
 dashboardRouter.get("/details/students", async (req, res) => {
   try {
-    // const hostelId = req.user.id;
-    const hostelId = 1;
+    const { hostelId } = req.query;
+    const where = {};
+    if (hostelId && hostelId !== "all") {
+      where.hostelId = parseInt(hostelId);
+    }
 
-    // Fetch students with their hostel name
     const students = await Prisma.student.findMany({
-      where: { hostelId },
+      where,
       include: {
         hostel: {
           select: { hostelName: true },
@@ -180,18 +200,87 @@ dashboardRouter.get("/details/students", async (req, res) => {
 
 dashboardRouter.get("/details/staff", async (req, res) => {
   try {
-    // const hostelId = req.user.id;
-    const hostelId = 1;
+    const { hostelId } = req.query;
+    const where = {};
+    if (hostelId && hostelId !== "all") {
+      where.hostelId = parseInt(hostelId);
+    }
 
-    // Fetch staff
     const staff = await Prisma.employee.findMany({
-      where: { hostelId },
+      where,
       orderBy: { dateOfJoining: "desc" },
     });
 
     res.status(200).json({ staff });
   } catch (error) {
     console.error("Dashboard Staff Details Error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// ==========================
+// 5. HOSTEL PERFORMANCE (For Admin "All Hostels" View)
+// ==========================
+dashboardRouter.get("/stats/hostel-performance", async (req, res) => {
+  try {
+    const hostels = await Prisma.hostel.findMany({
+      select: {
+        id: true,
+        hostelName: true,
+      },
+    });
+
+    const performance = await Promise.all(
+      hostels.map(async (hostel) => {
+        const [feeRes, salaryRes, expenseRes] = await Promise.all([
+          Prisma.feeCollection.aggregate({
+            where: { hostelId: hostel.id },
+            _sum: { amount: true },
+          }),
+          Prisma.salaryPayment.aggregate({
+            where: { hostelId: hostel.id },
+            _sum: { amount: true },
+          }),
+          Prisma.expense.aggregate({
+            where: { hostelId: hostel.id },
+            _sum: { amount: true },
+          }),
+        ]);
+
+        const totalRevenue = feeRes._sum.amount || 0;
+        const totalExpense =
+          (salaryRes._sum.amount || 0) + (expenseRes._sum.amount || 0);
+
+        return {
+          id: hostel.id,
+          name: hostel.hostelName,
+          totalRevenue,
+          totalExpense,
+        };
+      }),
+    );
+
+    res.status(200).json({ performance });
+  } catch (error) {
+    console.error("Hostel Performance Error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// ==========================
+// 6. HOSTEL LIST (For Dropdown)
+// ==========================
+dashboardRouter.get("/hostel-list", async (req, res) => {
+  try {
+    const hostels = await Prisma.hostel.findMany({
+      select: {
+        id: true,
+        hostelName: true,
+      },
+    });
+    res.status(200).json({ hostels });
+  } catch (error) {
+    console.error("Hostel List Error:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });

@@ -1,14 +1,15 @@
 import express from "express";
 const salaryRouter = express.Router();
 import Prisma from "../lib/prisma.js";
+import authMiddleware from "../middleware/authMiddleware.js";
 
 // ==========================
 // 1. ADD SALARY (POST)
 // ==========================
-salaryRouter.post("/pay-salary", async (req, res) => {
+salaryRouter.post("/pay-salary", authMiddleware, async (req, res) => {
   try {
-    // const hostelId = req.user.id;
-    const hostelId = 1;
+    const hostelId = req.user.id;
+    // const hostelId = 1;
 
     const {
       employeeId,
@@ -20,12 +21,10 @@ salaryRouter.post("/pay-salary", async (req, res) => {
     } = req.body;
 
     if (!employeeId || !amount || !salaryMonth) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "Employee ID, Amount, and Salary Month (e.g., 'Jan 2026') are required",
-        });
+      return res.status(400).json({
+        message:
+          "Employee ID, Amount, and Salary Month (e.g., 'Jan 2026') are required",
+      });
     }
 
     // 1. Verify Employee belongs to Hostel
@@ -64,10 +63,10 @@ salaryRouter.post("/pay-salary", async (req, res) => {
 // 2. LIST ALL SALARIES (GET)
 // ==========================
 // Shows a list of all payments made by the hostel
-salaryRouter.get("/all-salary-payments", async (req, res) => {
+salaryRouter.get("/all-salary-payments", authMiddleware, async (req, res) => {
   try {
-    // const hostelId = req.user.id;
-    const hostelId = 1;
+    const hostelId = req.user.id;
+    // const hostelId = 1;
 
     const payments = await Prisma.salaryPayment.findMany({
       where: { hostelId: hostelId },
@@ -103,10 +102,10 @@ salaryRouter.get("/all-salary-payments", async (req, res) => {
 // ==========================
 // 3. SINGLE SALARY DETAILS (GET)
 // ==========================
-salaryRouter.get("/salary-details/:id", async (req, res) => {
+salaryRouter.get("/salary-details/:id", authMiddleware, async (req, res) => {
   try {
-    // const hostelId = req.user.id;
-    const hostelId = 1;
+    const hostelId = req.user.id;
+    // const hostelId = 1;
     const paymentId = parseInt(req.params.id);
 
     const payment = await Prisma.salaryPayment.findFirst({
@@ -130,45 +129,49 @@ salaryRouter.get("/salary-details/:id", async (req, res) => {
 // ==========================
 // 4. ALL SALARY OF ONE EMPLOYEE (GET)
 // ==========================
-salaryRouter.get("/employee-salary-history/:employeeId", async (req, res) => {
-  try {
-    // const hostelId = req.user.id;
-    const hostelId = 1;
+salaryRouter.get(
+  "/employee-salary-history/:employeeId",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const hostelId = req.user.id;
+      // const hostelId = 1;
 
-    const employeeId = parseInt(req.params.employeeId);
+      const employeeId = parseInt(req.params.employeeId);
 
-    // Verify Employee
-    const employee = await Prisma.employee.findFirst({
-      where: { id: employeeId, hostelId: hostelId },
-      select: { name: true, salary: true }, // getting base salary for reference
-    });
+      // Verify Employee
+      const employee = await Prisma.employee.findFirst({
+        where: { id: employeeId, hostelId: hostelId },
+        select: { name: true, salary: true }, // getting base salary for reference
+      });
 
-    if (!employee)
-      return res.status(404).json({ message: "Employee not found" });
+      if (!employee)
+        return res.status(404).json({ message: "Employee not found" });
 
-    const history = await Prisma.salaryPayment.findMany({
-      where: { employeeId: employeeId, hostelId: hostelId },
-      orderBy: { paymentDate: "desc" },
-    });
+      const history = await Prisma.salaryPayment.findMany({
+        where: { employeeId: employeeId, hostelId: hostelId },
+        orderBy: { paymentDate: "desc" },
+      });
 
-    res.status(200).json({
-      employeeName: employee.name,
-      baseSalary: employee.salary,
-      history,
-    });
-  } catch (error) {
-    console.error("Employee Salary History Error:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-});
+      res.status(200).json({
+        employeeName: employee.name,
+        baseSalary: employee.salary,
+        history,
+      });
+    } catch (error) {
+      console.error("Employee Salary History Error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  },
+);
 
 // ==========================
 // 5. UPDATE SALARY (PUT)
 // ==========================
-salaryRouter.put("/update-salary/:id", async (req, res) => {
+salaryRouter.put("/update-salary/:id", authMiddleware, async (req, res) => {
   try {
-    // const hostelId = req.user.id;
-    const hostelId = 1;
+    const hostelId = req.user.id;
+    // const hostelId = 1;
 
     const paymentId = parseInt(req.params.id);
     const { amount, salaryMonth, paymentDate, paymentMethod, remarks } =
@@ -204,10 +207,10 @@ salaryRouter.put("/update-salary/:id", async (req, res) => {
 // ==========================
 // 6. DELETE SALARY (DELETE)
 // ==========================
-salaryRouter.delete("/delete-salary/:id", async (req, res) => {
+salaryRouter.delete("/delete-salary/:id", authMiddleware, async (req, res) => {
   try {
-    // const hostelId = req.user.id;
-    const hostelId = 1;
+    const hostelId = req.user.id;
+    // const hostelId = 1;
 
     const paymentId = parseInt(req.params.id);
 
@@ -230,64 +233,68 @@ salaryRouter.delete("/delete-salary/:id", async (req, res) => {
 // 7. SALARY STATUS (GET) - Total, Paid, Due
 // ==========================
 // Usage: /salary-status/1?month=Jan 2026
-salaryRouter.get("/salary-status/:employeeId", async (req, res) => {
-  try {
-    // const hostelId = req.user.id;
-    const hostelId = 1;
+salaryRouter.get(
+  "/salary-status/:employeeId",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const hostelId = req.user.id;
+      // const hostelId = 1;
 
-    const employeeId = parseInt(req.params.employeeId);
-    // Optional: Filter by specific month from query params (e.g., ?month=Jan 2026)
-    const { month } = req.query;
+      const employeeId = parseInt(req.params.employeeId);
+      // Optional: Filter by specific month from query params (e.g., ?month=Jan 2026)
+      const { month } = req.query;
 
-    // 1. Get Employee's Base Salary (The "Total" expected)
-    const employee = await Prisma.employee.findFirst({
-      where: { id: employeeId, hostelId: hostelId },
-      select: { id: true, name: true, salary: true },
-    });
+      // 1. Get Employee's Base Salary (The "Total" expected)
+      const employee = await Prisma.employee.findFirst({
+        where: { id: employeeId, hostelId: hostelId },
+        select: { id: true, name: true, salary: true },
+      });
 
-    if (!employee)
-      return res.status(404).json({ message: "Employee not found" });
+      if (!employee)
+        return res.status(404).json({ message: "Employee not found" });
 
-    // 2. Calculate Total Paid
-    // If a month is provided, we filter by it. Otherwise, we might sum ALL history
-    // (but 'Due' usually only makes sense per month).
-    // Let's assume if no month is given, we return stats for ALL time vs specific month logic.
+      // 2. Calculate Total Paid
+      // If a month is provided, we filter by it. Otherwise, we might sum ALL history
+      // (but 'Due' usually only makes sense per month).
+      // Let's assume if no month is given, we return stats for ALL time vs specific month logic.
 
-    let whereClause = {
-      employeeId: employeeId,
-      hostelId: hostelId,
-    };
+      let whereClause = {
+        employeeId: employeeId,
+        hostelId: hostelId,
+      };
 
-    if (month) {
-      whereClause.salaryMonth = month;
+      if (month) {
+        whereClause.salaryMonth = month;
+      }
+
+      const paymentStats = await Prisma.salaryPayment.aggregate({
+        where: whereClause,
+        _sum: { amount: true },
+      });
+
+      const totalSalary = employee.salary || 0; // Monthly Fixed Salary
+      const paidAmount = paymentStats._sum.amount || 0;
+
+      // Logic:
+      // If filtering by month: Due = Fixed Salary - Paid in that month
+      // If no month filter: Due calculation is tricky, but let's just show Total vs Paid
+      const dueAmount = month ? totalSalary - paidAmount : 0;
+
+      res.status(200).json({
+        employee: employee,
+        month: month || "All Time",
+        status: {
+          totalSalary: totalSalary, // The fixed monthly salary
+          paid: paidAmount, // How much given so far
+          due: dueAmount < 0 ? 0 : dueAmount, // Remaining to pay (prevent negative)
+        },
+      });
+    } catch (error) {
+      console.error("Salary Status Error:", error);
+      res.status(500).json({ message: "Internal server error" });
     }
-
-    const paymentStats = await Prisma.salaryPayment.aggregate({
-      where: whereClause,
-      _sum: { amount: true },
-    });
-
-    const totalSalary = employee.salary || 0; // Monthly Fixed Salary
-    const paidAmount = paymentStats._sum.amount || 0;
-
-    // Logic:
-    // If filtering by month: Due = Fixed Salary - Paid in that month
-    // If no month filter: Due calculation is tricky, but let's just show Total vs Paid
-    const dueAmount = month ? totalSalary - paidAmount : 0;
-
-    res.status(200).json({
-      employee: employee,
-      month: month || "All Time",
-      status: {
-        totalSalary: totalSalary, // The fixed monthly salary
-        paid: paidAmount, // How much given so far
-        due: dueAmount < 0 ? 0 : dueAmount, // Remaining to pay (prevent negative)
-      },
-    });
-  } catch (error) {
-    console.error("Salary Status Error:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-});
+  },
+);
 
 export default salaryRouter;

@@ -127,6 +127,7 @@ model Employee {
   
   // --- Media ---
   photoUrl      String?
+  idProofUrl    String?
 
   // --- Relation ---
   hostelId      Int

@@ -1,6 +1,7 @@
 import express from "express";
 import Prisma from "../lib/prisma.js";
 import { hashPassword } from "../utils/hash.js";
+import authMiddleware from "../middleware/authMiddleware.js";
 
 import dotenv from "dotenv";
 dotenv.config();
@@ -10,11 +11,11 @@ const userRouter = express.Router();
 // ==========================
 // UPDATE PROFILE ROUTE
 // ==========================
-userRouter.put("/update-profile", async (req, res) => {
+userRouter.put("/update-profile", authMiddleware, async (req, res) => {
   try {
     // Assume verifyToken middleware adds the logged-in user's info to req.user
-    // const userId = req.user.id;
-    const userId = 1;
+    const userId = req.user.id;
+    // const userId = 1;
     const { hostelName, email, password } = req.body;
 
     // 1. Prepare the data object for update
@@ -70,10 +71,12 @@ userRouter.put("/update-profile", async (req, res) => {
   }
 });
 
-userRouter.put("/update-fee", async (req, res) => {
+userRouter.put("/update-fee", authMiddleware, async (req, res) => {
   try {
     // const userId = req.user.id; // From token
-    const userId = 1;
+    // const userId = 1;
+    const userId = parseInt(req.body.hostelId || req.user.id);
+
     const { amount } = req.body;
 
     // 1. Validation
