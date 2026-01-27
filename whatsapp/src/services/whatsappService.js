@@ -1,5 +1,6 @@
 import pkg from "whatsapp-web.js";
 const { Client, RemoteAuth } = pkg;
+
 import qrcode from "qrcode-terminal";
 import Prisma from "../lib/prisma.js";
 import DatabaseStore from "../utils/DatabaseStore.js";
@@ -10,7 +11,19 @@ const SESSION_ID = "hostel";
 export let whatsappClient = null;
 
 export const initializeWhatsapp = async () => {
-  console.log("🔄 Initializing WhatsApp (Ultra-Lite Mode)...");
+  console.log("🔄 Initializing WhatsApp (HF Safe Mode)...");
+
+  try {
+    const existingSession = await Prisma.whatsappSession.findUnique({
+      where: { sessionId: SESSION_ID },
+    });
+
+    if (existingSession) {
+      console.log("✅ Found existing session in DB.");
+    } else {
+      console.log("ℹ️ No session found. Awaiting QR Code...");
+    }
+  } catch {}
 
   whatsappClient = new Client({
     authStrategy: new RemoteAuth({
@@ -19,28 +32,28 @@ export const initializeWhatsapp = async () => {
       backupSyncIntervalMs: 600000,
       dataPath: ".wwebjs_auth",
     }),
-    // Increase timeouts significantly for slow free servers
-    authTimeoutMs: 120000, // 2 Minutes
+
+    authTimeoutMs: 120000,
     qrMaxRetries: 10,
+
     puppeteer: {
       headless: true,
-      // ✅ Point to the global Chrome installed by Docker
-      executablePath: "/usr/bin/google-chrome",
+      executablePath:
+        process.env.PUPPETEER_EXECUTABLE_PATH || "/usr/bin/google-chrome",
       args: [
         "--no-sandbox",
         "--disable-setuid-sandbox",
         "--disable-dev-shm-usage",
         "--disable-gpu",
-        "--single-process",
+        "--disable-software-rasterizer",
         "--no-zygote",
+        "--single-process",
       ],
     },
   });
 
   whatsappClient.on("qr", (qr) => {
-    console.log("▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄");
-    console.log("📲 SCAN QUICKLY! (Server might restart due to low RAM)");
-    console.log("▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄");
+    console.log("📲 Scan this QR Code FAST:");
     qrcode.generate(qr, { small: true });
   });
 
@@ -49,7 +62,7 @@ export const initializeWhatsapp = async () => {
   });
 
   whatsappClient.on("remote_session_saved", () => {
-    console.log("💾 Session successfully saved to Database!");
+    console.log("💾 Session saved to Database!");
   });
 
   whatsappClient.on("disconnected", (reason) => {

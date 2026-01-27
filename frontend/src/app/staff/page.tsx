@@ -1,5 +1,5 @@
-import EmployeeManager from "@/app/pages/EmployeeManager";
+import EmployeeManager from "../pages/EmployeeManager";
 
 export default function StaffPage() {
-  return <EmployeeManager initialTab="list" />;
+  return <EmployeeManager />;
 }

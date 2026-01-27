@@ -14,12 +14,10 @@ type Employee = {
   photoUrl: string;
 };
 
-export default function EmployeeManager({ initialTab = "list" }: { initialTab?: "list" | "add" }) {
-  const [tab, setTab] = useState<"list" | "add">(initialTab);
+export default function EmployeeManager() {
+  const [tab, setTab] = useState<"list" | "add" | "edit">("list");
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [showEdit, setShowEdit] = useState(false);
-  const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState<any>({
     name: "",
@@ -34,13 +32,16 @@ export default function EmployeeManager({ initialTab = "list" }: { initialTab?: 
   });
 
   const inputClass =
+<<<<<<< HEAD
     "w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-medium text-gray-700 focus:ring-2 focus:ring-orange-100 focus:border-orange-200 outline-none transition-all placeholder:text-gray-400";
+=======
+    "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500";
+>>>>>>> d36795f386624f5b06d0f4105926117504ae97f9
   const labelClass = "text-sm font-medium text-gray-700";
 
   const loadEmployees = async () => {
     try {
       const res = await API.get("/api/employee/all-staff");
-      console.log(res.data);
       setEmployees(res.data.staff || []);
     } catch {
       toast.error("Failed to load employees");
@@ -58,7 +59,6 @@ export default function EmployeeManager({ initialTab = "list" }: { initialTab?: 
 
   const submitAdd = async () => {
     try {
-      setLoading(true);
       const fd = new FormData();
       Object.entries(form).forEach(([k, v]) => v && fd.append(k, v as any));
 
@@ -68,42 +68,31 @@ export default function EmployeeManager({ initialTab = "list" }: { initialTab?: 
       loadEmployees();
     } catch {
       toast.error("Failed to add employee");
-    } finally {
-      setLoading(false);
     }
   };
 
-  const openEditDialog = async (id: number) => {
+  const loadEmployeeDetails = async (id: number) => {
     try {
-      setLoading(true);
       const res = await API.get(`/api/employee/staff-details/${id}`);
       setForm(res.data.employee);
-      
       setSelectedId(id);
-      setShowEdit(true);
+      setTab("edit");
     } catch {
       toast.error("Failed to load employee details");
-    } finally {
-      setLoading(false);
     }
   };
 
   const submitUpdate = async () => {
-    if (!selectedId) return;
-
     try {
-      setLoading(true);
       const fd = new FormData();
       Object.entries(form).forEach(([k, v]) => v && fd.append(k, v as any));
 
       await API.put(`/api/employee/update-staff/${selectedId}`, fd);
       toast.success("Employee updated");
-      setShowEdit(false);
+      setTab("list");
       loadEmployees();
     } catch {
       toast.error("Failed to update employee");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -111,14 +100,11 @@ export default function EmployeeManager({ initialTab = "list" }: { initialTab?: 
     if (!confirm("Delete this employee?")) return;
 
     try {
-      setLoading(true);
       await API.delete(`/api/employee/delete-staff/${id}`);
       toast.success("Employee deleted");
       loadEmployees();
     } catch {
       toast.error("Failed to delete employee");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -129,92 +115,57 @@ export default function EmployeeManager({ initialTab = "list" }: { initialTab?: 
 
         {/* TABS */}
         <div className="flex gap-3 mb-6">
-          {["list", "add"].map((t) => (
+          {["list", "add", "edit"].map((t) => (
             <button
               key={t}
               onClick={() => setTab(t as any)}
               className={`px-4 py-2 rounded-lg text-sm font-medium ${
                 tab === t
-                  ? "bg-orange-600 text-white"
+                  ? "bg-blue-600 text-white"
                   : "bg-gray-100 hover:bg-gray-200"
               }`}
             >
-              {t === "list" ? "All Employees" : "Add Employee"}
+              {t === "list" && "All Employees"}
+              {t === "add" && "Add Employee"}
+              {t === "edit" && "Edit Employee"}
             </button>
           ))}
         </div>
 
         {/* LIST */}
-{tab === "list" && (
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-    {employees.map((e) => (
-      <div
-        key={e.id}
-        className="border rounded-2xl p-5 shadow-md hover:shadow-xl transition bg-white"
-      >
-        {/* PHOTO + NAME */}
-        <div className="flex items-center gap-4 mb-4">
-          <img
-            src={e.photoUrl}
-            className="w-20 h-20 rounded-full object-cover border"
-          />
-          <div>
-            <div className="font-semibold text-lg">{e.name}</div>
-            <div className="text-sm text-gray-500">{e.role}</div>
-          </div>
-        </div>
+        {tab === "list" && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {employees.map((e) => (
+              <div
+                key={e.id}
+                className="border rounded-xl p-5 shadow hover:shadow-lg transition"
+              >
+                <img
+                  src={e.photoUrl}
+                  className="w-20 h-20 rounded-full object-cover mb-3"
+                />
+                <div className="font-semibold">{e.name}</div>
+                <div className="text-sm text-gray-500">{e.email}</div>
+                <div className="text-sm text-gray-600">{e.role}</div>
 
-        {/* DETAILS */}
-        <div className="space-y-1 text-sm text-gray-700">
-          <div>
-            <span className="font-medium">Email:</span> {e.email}
+                <div className="flex gap-3 mt-4">
+                  <button
+                    onClick={() => loadEmployeeDetails(e.id)}
+                    className="flex-1 bg-blue-600 text-white py-2 rounded-lg text-sm"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => deleteEmployee(e.id)}
+                    className="flex-1 border border-red-400 text-red-600 py-2 rounded-lg text-sm"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
-          <div>
-            <span className="font-medium">Phone:</span> {e.phone}
-          </div>
-          <div>
-            <span className="font-medium">Role:</span> {e.role}
-          </div>
-          <div>
-            <span className="font-medium">Gender:</span>{" "}
-            {(e as any).gender || "-"}
-          </div>
-          <div>
-            <span className="font-medium">Address:</span>{" "}
-            {(e as any).address || "-"}
-          </div>
-          <div>
-            <span className="font-medium">Salary:</span>{" "}
-            {(e as any).salary || "-"}
-          </div>
-          <div>
-            <span className="font-medium">Joining Date:</span>{" "}
-            {(e as any).dateOfJoining
-              ? new Date((e as any).dateOfJoining).toLocaleDateString()
-              : "-"}
-          </div>
-        </div>
-
-        {/* ACTION BUTTONS */}
-        <div className="flex gap-3 mt-5">
-          <button
-            onClick={() => openEditDialog(e.id)}
-            className="flex-1 bg-orange-600 hover:bg-orange-700 text-white py-2 rounded-lg text-sm font-semibold transition"
-          >
-            Edit
-          </button>
-          <button
-            onClick={() => deleteEmployee(e.id)}
-            className="flex-1 border border-red-400 text-red-600 hover:bg-red-50 py-2 rounded-lg text-sm font-semibold transition"
-          >
-            Delete
-          </button>
-        </div>
-      </div>
-    ))}
-  </div>
-)}
-
+        )}
 
 {/* ADD */}
         {tab === "add" && (
@@ -292,14 +243,56 @@ export default function EmployeeManager({ initialTab = "list" }: { initialTab?: 
 
             <button
               onClick={submitAdd}
+<<<<<<< HEAD
               disabled={loading}
               className="md:col-span-2 bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-xl font-semibold transition disabled:opacity-50"
+=======
+              className="md:col-span-2 bg-blue-600 text-white py-3 rounded-xl"
+>>>>>>> d36795f386624f5b06d0f4105926117504ae97f9
             >
-              {loading ? "Adding..." : "Add Employee"}
+              Add Employee
+            </button>
+          </div>
+        )}
+
+        {/* EDIT */}
+        {tab === "edit" && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {Object.entries(form).map(
+              ([key, val]) =>
+                key !== "photo" && (
+                  <div key={key}>
+                    <label className={labelClass}>{key}</label>
+                    <input
+                      name={key}
+                      value={val as any}
+                      className={inputClass}
+                      onChange={handleChange}
+                    />
+                  </div>
+                ),
+            )}
+
+            <div>
+              <label className={labelClass}>Photo</label>
+              <input
+                type="file"
+                name="photo"
+                className={inputClass}
+                onChange={handleChange}
+              />
+            </div>
+
+            <button
+              onClick={submitUpdate}
+              className="md:col-span-2 bg-green-600 text-white py-3 rounded-xl"
+            >
+              Update Employee
             </button>
           </div>
         )}
       </div>
+<<<<<<< HEAD
 
       {/* EDIT DIALOG */}
       {showEdit && (
@@ -416,6 +409,8 @@ export default function EmployeeManager({ initialTab = "list" }: { initialTab?: 
         </div>
       )}
 
+=======
+>>>>>>> d36795f386624f5b06d0f4105926117504ae97f9
     </div>
   );
 }

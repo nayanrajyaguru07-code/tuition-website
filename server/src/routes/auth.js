@@ -52,6 +52,7 @@ authRouter.post("/signup", async (req, res) => {
 // ==========================
 // 2. LOGIN ROUTE
 // ==========================
+<<<<<<< HEAD
 
 authRouter.post("/login", async (req, res) => {
   try {
@@ -83,6 +84,12 @@ authRouter.post("/login", async (req, res) => {
         return res.status(401).json({ message: "Invalid Secret Key" });
       }
     }
+=======
+authRouter.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+>>>>>>> d36795f386624f5b06d0f4105926117504ae97f9
     // 1. Find the hostel by email
     const hostel = await Prisma.hostel.findUnique({
       where: { email },
@@ -100,6 +107,7 @@ authRouter.post("/login", async (req, res) => {
     }
 
     // 3. Generate Token using your utility
+    // Assuming generateToken accepts (payload, expiresIn) or just (payload)
     const token = generateToken({ id: hostel.id, email: hostel.email });
 
     res

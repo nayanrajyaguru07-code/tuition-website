@@ -21,14 +21,10 @@ type FeeHistory = {
   feeRemark: string | null;
 };
 
-export default function FeeForm({
-  initialTab = "collect",
-}: {
-  initialTab?: "collect" | "history" | "status" | "edit" | "studentHistory";
-}) {
+export default function FeeForm() {
   const [tab, setTab] = useState<
     "collect" | "history" | "status" | "edit" | "studentHistory"
-  >(initialTab);
+  >("collect");
 
   const [students, setStudents] = useState<Student[]>([]);
   const [studentId, setStudentId] = useState("");
@@ -43,10 +39,13 @@ export default function FeeForm({
   const [studentHistory, setStudentHistory] = useState<any[]>([]);
   const [status, setStatus] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-  const [baseFee, setBaseFee] = useState<number | null>(null);
 
   const inputClass =
+<<<<<<< HEAD
     "w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-medium text-gray-700 focus:ring-2 focus:ring-orange-100 focus:border-orange-200 outline-none transition-all placeholder:text-gray-400";
+=======
+    "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500";
+>>>>>>> d36795f386624f5b06d0f4105926117504ae97f9
   const labelClass = "text-sm font-medium text-gray-700";
 
   const studentOptions = students.map((s) => ({
@@ -164,8 +163,7 @@ export default function FeeForm({
 
   useEffect(() => {
     if (tab === "history") loadHistory();
-    if ((tab === "studentHistory" || tab === "edit") && studentId) loadStudentHistory();
-  }, [tab, studentId]);
+  }, [tab]);
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -188,7 +186,7 @@ export default function FeeForm({
               onClick={() => setTab(key as any)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
                 tab === key
-                  ? "bg-orange-600 text-white"
+                  ? "bg-blue-600 text-white"
                   : "bg-gray-100 hover:bg-gray-200"
               }`}
             >
@@ -199,6 +197,7 @@ export default function FeeForm({
 
         {/* STUDENT SELECTOR */}
         <div className="mb-6">
+<<<<<<< HEAD
           <div className="flex justify-between items-center mb-1">
              <label className={labelClass}>Select Student</label>
              {baseFee !== null && (
@@ -225,6 +224,21 @@ export default function FeeForm({
             }}
             placeholder="-- Select Student --"
           />
+=======
+          <label className={labelClass}>Select Student</label>
+          <select
+            className={inputClass}
+            value={studentId}
+            onChange={(e) => setStudentId(e.target.value)}
+          >
+            <option value="">-- Select Student --</option>
+            {students.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.fullName} ({s.studentMobileNo})
+              </option>
+            ))}
+          </select>
+>>>>>>> d36795f386624f5b06d0f4105926117504ae97f9
         </div>
 
         {/* COLLECT FEE */}
@@ -280,7 +294,7 @@ export default function FeeForm({
             <button
               onClick={collectFee}
               disabled={loading}
-              className="md:col-span-2 bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-xl font-semibold transition disabled:opacity-50"
+              className="md:col-span-2 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold transition disabled:opacity-50"
             >
               {loading ? "Processing..." : "Collect Fee"}
             </button>
@@ -324,7 +338,7 @@ export default function FeeForm({
           <div className="space-y-4">
             <button
               onClick={loadStudentHistory}
-              className="bg-orange-600 text-white px-5 py-2 rounded-lg"
+              className="bg-blue-600 text-white px-5 py-2 rounded-lg"
             >
               Load History
             </button>
@@ -348,7 +362,7 @@ export default function FeeForm({
           <div className="space-y-4">
             <button
               onClick={loadStatus}
-              className="bg-orange-600 text-white px-5 py-2 rounded-lg"
+              className="bg-blue-600 text-white px-5 py-2 rounded-lg"
             >
               Check Status
             </button>
@@ -367,6 +381,7 @@ export default function FeeForm({
         {/* EDIT FEE */}
         {tab === "edit" && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+<<<<<<< HEAD
             <div className="md:col-span-2">
               <label className={labelClass}>Select Transaction to Edit</label>
               <SearchableSelect
@@ -392,11 +407,14 @@ export default function FeeForm({
             
             {/* Hidden or ReadOnly Edit ID for reference */}
             <div className="hidden">
+=======
+            <div>
+>>>>>>> d36795f386624f5b06d0f4105926117504ae97f9
               <label className={labelClass}>Record ID</label>
               <input
                 className={inputClass}
                 value={editId}
-                readOnly
+                onChange={(e) => setEditId(e.target.value)}
               />
             </div>
 
@@ -450,7 +468,7 @@ export default function FeeForm({
             <button
               onClick={updateFee}
               disabled={loading}
-              className="md:col-span-2 bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-xl font-semibold transition disabled:opacity-50"
+              className="md:col-span-2 bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-semibold transition disabled:opacity-50"
             >
               {loading ? "Updating..." : "Update Fee Record"}
             </button>

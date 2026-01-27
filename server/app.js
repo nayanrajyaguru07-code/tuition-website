@@ -12,6 +12,7 @@ import salaryRouter from "./src/routes/salary.js";
 import dashboardRouter from "./src/routes/dashboard.js";
 import { initializeWhatsapp } from "./src/services/whatsappService.js";
 import whatsappRouter from "./src/routes/whatsapp.js";
+import contactRouter from "./src/routes/contact.js";
 
 const app = express();
 
@@ -47,5 +48,6 @@ app.use("/api/expense", expenseRouter);
 app.use("/api/salary", salaryRouter);
 app.use("/api/dashboard", dashboardRouter);
 app.use("/api/whatsapp", whatsappRouter);
+app.use("/api/contact", contactRouter);
 
 export default app;
