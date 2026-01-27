@@ -8,9 +8,11 @@ import SearchableSelect from "@/components/SearchableSelect";
 export default function StudentForm({
   id,
   onSuccess,
+  isDialog,
 }: {
   id?: string;
   onSuccess?: () => void;
+  isDialog?: boolean;
 }) {
   const [data, setData] = useState<any>({});
   const [loading, setLoading] = useState(false);
@@ -69,9 +71,11 @@ export default function StudentForm({
   return (
     <div className="p-1">
       <div className="bg-white rounded-2xl p-0 md:p-2">
-        <h2 className="text-2xl font-bold mb-6 text-gray-900">
-          {id ? "Update Student" : "Add New Student"}
-        </h2>
+        {!isDialog && (
+          <h2 className="text-2xl font-bold mb-6 text-gray-900">
+            {id ? "Update Student" : "Add New Student"}
+          </h2>
+        )}
 
         {/* BASIC INFO */}
         <div className="mb-8">
