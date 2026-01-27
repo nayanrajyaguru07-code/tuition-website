@@ -63,7 +63,7 @@ export default function StudentList() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-100 via-red-50 to-orange-200 p-6">
+    <div className="min-h-screen p-6">
       <div className="max-w-7xl mx-auto">
         {/* HEADER */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">

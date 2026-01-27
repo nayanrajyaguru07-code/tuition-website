@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { API } from "@/lib/api";
 import toast from "react-hot-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import SearchableSelect from "@/components/SearchableSelect";
 
 type Expense = {
   id: number;
@@ -31,7 +32,7 @@ export default function ExpenseManager({ initialTab = "list" }: { initialTab?: "
   });
 
   const inputClass =
-    "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500";
+    "w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-medium text-gray-700 focus:ring-2 focus:ring-orange-100 focus:border-orange-200 outline-none transition-all placeholder:text-gray-400";
   const labelClass = "text-sm font-medium text-gray-700";
 
   const loadExpenses = async () => {
@@ -179,23 +180,57 @@ export default function ExpenseManager({ initialTab = "list" }: { initialTab?: "
         {/* ADD */}
         {tab === "add" && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {[
-              ["title", "Title"],
-              ["amount", "Amount"],
-              ["expenseDate", "Expense Date"],
-              ["category", "Category"],
-              ["paymentMethod", "Payment Method"],
-            ].map(([key, label]) => (
-              <div key={key}>
-                <label className={labelClass}>{label}</label>
-                <input
-                  name={key}
-                  type={key === "expenseDate" ? "date" : "text"}
-                  className={inputClass}
-                  onChange={handleChange}
-                />
-              </div>
-            ))}
+            <div>
+              <label className={labelClass}>Title</label>
+              <input name="title" className={inputClass} onChange={handleChange} />
+            </div>
+            
+            <div>
+              <label className={labelClass}>Amount</label>
+              <input name="amount" className={inputClass} onChange={handleChange} />
+            </div>
+
+            <div>
+              <label className={labelClass}>Expense Date</label>
+              <input
+                 type="date"
+                 name="expenseDate"
+                 className={inputClass}
+                 onChange={handleChange}
+              />
+            </div>
+
+            <div>
+              <label className={labelClass}>Category</label>
+              <SearchableSelect
+                options={[
+                  { value: "General", label: "General" },
+                  { value: "Maintenance", label: "Maintenance" },
+                  { value: "Food", label: "Food" },
+                  { value: "Utilities", label: "Utilities" },
+                  { value: "Salary", label: "Salary" },
+                  { value: "Other", label: "Other" },
+                ]}
+                value={form.category}
+                onChange={(val) => handleChange({ target: { name: "category", value: val } })}
+                placeholder="Select Category"
+              />
+            </div>
+
+            <div>
+              <label className={labelClass}>Payment Method</label>
+              <SearchableSelect
+                options={[
+                  { value: "Cash", label: "Cash" },
+                  { value: "UPI", label: "UPI" },
+                  { value: "Card", label: "Card" },
+                  { value: "Bank Transfer", label: "Bank Transfer" },
+                ]}
+                value={form.paymentMethod}
+                onChange={(val) => handleChange({ target: { name: "paymentMethod", value: val } })}
+                placeholder="Select Method"
+              />
+            </div>
 
             <div className="md:col-span-2">
               <label className={labelClass}>Description</label>
@@ -208,7 +243,7 @@ export default function ExpenseManager({ initialTab = "list" }: { initialTab?: "
 
             <button
               onClick={submitAdd}
-              className="md:col-span-2 bg-orange-600 text-white py-3 rounded-xl"
+              className="md:col-span-2 bg-orange-600 text-white py-3 rounded-xl hover:bg-orange-700 transition font-semibold"
             >
               Add Expense
             </button>
@@ -223,34 +258,69 @@ export default function ExpenseManager({ initialTab = "list" }: { initialTab?: "
              </DialogHeader>
              
              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 py-4">
-                {Object.entries(form).map(([key, val]) => (
-                  <div key={key} className={key === 'description' ? 'md:col-span-2' : ''}>
-                    <label className={labelClass}>{key.charAt(0).toUpperCase() + key.slice(1)}</label>
-                    {key === 'description' ? (
-                       <textarea
-                         name={key}
-                         value={val as any}
-                         className={inputClass}
-                         onChange={handleChange}
-                       />
-                    ) : (
-                       <input
-                         name={key}
-                         value={val as any}
-                         type={key === "expenseDate" ? "date" : "text"}
-                         className={inputClass}
-                         onChange={handleChange}
-                       />
-                    )}
-                  </div>
-                ))}
+                 <div>
+                    <label className={labelClass}>Title</label>
+                    <input name="title" value={form.title} className={inputClass} onChange={handleChange} />
+                 </div>
+                 
+                 <div>
+                    <label className={labelClass}>Amount</label>
+                    <input name="amount" value={form.amount} className={inputClass} onChange={handleChange} />
+                 </div>
 
-                <button
-                  onClick={submitUpdate}
-                  className="md:col-span-2 bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700 transition"
-                >
-                  Update Expense
-                </button>
+                 <div>
+                    <label className={labelClass}>Expense Date</label>
+                    <input name="expenseDate" type="date" value={form.expenseDate} className={inputClass} onChange={handleChange} />
+                 </div>
+
+                 <div>
+                    <label className={labelClass}>Category</label>
+                    <SearchableSelect
+                      options={[
+                        { value: "General", label: "General" },
+                        { value: "Maintenance", label: "Maintenance" },
+                        { value: "Food", label: "Food" },
+                        { value: "Utilities", label: "Utilities" },
+                        { value: "Salary", label: "Salary" },
+                        { value: "Other", label: "Other" },
+                      ]}
+                      value={form.category}
+                      onChange={(val) => handleChange({ target: { name: "category", value: val } })}
+                      placeholder="Select Category"
+                    />
+                 </div>
+
+                 <div>
+                    <label className={labelClass}>Payment Method</label>
+                    <SearchableSelect
+                      options={[
+                        { value: "Cash", label: "Cash" },
+                        { value: "UPI", label: "UPI" },
+                        { value: "Card", label: "Card" },
+                        { value: "Bank Transfer", label: "Bank Transfer" },
+                      ]}
+                      value={form.paymentMethod}
+                      onChange={(val) => handleChange({ target: { name: "paymentMethod", value: val } })}
+                      placeholder="Select Method"
+                    />
+                 </div>
+
+                 <div className="md:col-span-2">
+                    <label className={labelClass}>Description</label>
+                    <textarea
+                      name="description"
+                      value={form.description}
+                      className={inputClass}
+                      onChange={handleChange}
+                    />
+                 </div>
+
+                 <button
+                   onClick={submitUpdate}
+                   className="md:col-span-2 bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700 transition"
+                 >
+                   Update Expense
+                 </button>
              </div>
            </DialogContent>
         </Dialog>

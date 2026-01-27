@@ -4,6 +4,8 @@ import Link from "next/link";
 import { Users, UserPlus, Briefcase, Wallet, LayoutDashboard } from "lucide-react";
 import { useEffect, useState } from "react";
 
+import { API } from "@/lib/api";
+
 type Feature = {
   title: string;
   description: string;
@@ -24,6 +26,33 @@ const adminFeatures: Feature[] = [
     bg: "bg-orange-50",
     iconBg: "from-orange-400 to-orange-500",
     glow: "from-orange-300/40 to-orange-400/40",
+  },
+   {
+    title: "Add Fee",
+    description: "Collect student fees",
+    href: "/fee/add",
+    icon: <Wallet size={26} />,
+    bg: "bg-red-50",
+    iconBg: "from-red-400 to-red-500",
+    glow: "from-red-300/40 to-red-400/40",
+  },
+  {
+    title: "Fee History",
+    description: "View fee records",
+    href: "/fee",
+    icon: <Wallet size={26} />,
+    bg: "bg-orange-50",
+    iconBg: "from-orange-400 to-orange-500",
+    glow: "from-orange-300/40 to-orange-400/40",
+  },
+  {
+    title:"staff salary",
+    description:"View staff salary",
+    href:"/salary",
+    icon:<Wallet size={26} />,
+    bg:"bg-red-50",
+    iconBg:"from-red-400 to-red-500",
+    glow:"from-red-300/40 to-red-400/40",
   },
   {
     title: "Add Student",
@@ -79,65 +108,39 @@ const adminFeatures: Feature[] = [
     iconBg: "from-orange-400 to-orange-500",
     glow: "from-orange-300/40 to-orange-400/40",
   },
-  {
-    title: "Add Fee",
-    description: "Collect student fees",
-    href: "/fee/add",
-    icon: <Wallet size={26} />,
-    bg: "bg-red-50",
-    iconBg: "from-red-400 to-red-500",
-    glow: "from-red-300/40 to-red-400/40",
-  },
-  {
-    title: "Fee History",
-    description: "View fee records",
-    href: "/fee",
-    icon: <Wallet size={26} />,
-    bg: "bg-orange-50",
-    iconBg: "from-orange-400 to-orange-500",
-    glow: "from-orange-300/40 to-orange-400/40",
-  },
+ 
 ];
 
 // Features visible to Guests (Not Logged In)
-const guestFeatures: Feature[] = [
-  {
-      title: "Admin Login",
-      description: "Secure login for admins",
-      href: "/admin/login",
-      icon: <LayoutDashboard size={26} />,
-      bg: "bg-gray-100",
-      iconBg: "from-gray-600 to-gray-800",
-      glow: "from-gray-400/40 to-gray-500/40",
-    },
-];
+// REMOVED as per request - Route is now protected
 
 export default function Home() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [loading, setLoading] = useState(true);
+  // Since ClientLayout protects this route, we can assume user is logged in or being redirected.
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-     // Check if token exists
-     const token = localStorage.getItem("token");
-     setIsLoggedIn(!!token);
-     setLoading(false);
+    API.get("/api/auth/me")
+      .then((res) => {
+        if (res.data?.hostel?.email === "admin@tuition.com") {
+          setIsAdmin(true);
+        }
+      })
+      .catch((err) => console.error(err));
   }, []);
 
-  if (loading) return null; // Avoid flash
-
-  const visibleFeatures = isLoggedIn ? adminFeatures : guestFeatures;
-
+  const visibleFeatures = adminFeatures.filter(
+    (f) => f.title !== "Dashboard" || isAdmin
+  );
+  
   return (
     <div className="min-h-screen p-6 md:p-10">
       {/* HEADER GREETING */}
       <div className="max-w-7xl mx-auto mb-10 text-center md:text-left">
           <h1 className="text-3xl font-bold text-gray-900">
-             {isLoggedIn ? "Welcome Back, Manager 👋" : "Tuition Management System"}
+             Welcome Back, Manager 👋
           </h1>
           <p className="text-gray-500 mt-2">
-             {isLoggedIn 
-               ? "Select an action to proceed with your daily tasks."
-               : "Please login to access the dashboard and manage records."}
+             Select an action to proceed with your daily tasks.
           </p>
       </div>
 

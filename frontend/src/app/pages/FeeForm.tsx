@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { API } from "@/lib/api";
 import toast from "react-hot-toast";
+import SearchableSelect from "@/components/SearchableSelect";
 
 type Student = {
   id: number;
@@ -45,8 +46,20 @@ export default function FeeForm({
   const [baseFee, setBaseFee] = useState<number | null>(null);
 
   const inputClass =
-    "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500";
+    "w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-medium text-gray-700 focus:ring-2 focus:ring-orange-100 focus:border-orange-200 outline-none transition-all placeholder:text-gray-400";
   const labelClass = "text-sm font-medium text-gray-700";
+
+  const studentOptions = students.map((s) => ({
+    value: s.id,
+    label: `${s.fullName} (${s.studentMobileNo})`,
+  }));
+
+  const paymentMethodOptions = [
+    { value: "UPI", label: "UPI" },
+    { value: "Cash", label: "Cash" },
+    { value: "Card", label: "Card" },
+    { value: "Bank Transfer", label: "Bank Transfer" },
+  ];
 
   // 🔹 Load students once
   useEffect(() => {
@@ -106,6 +119,7 @@ export default function FeeForm({
         amount,
         paymentDate,
         paymentMethod,
+        paymentMethodId: null, // Depending on backend need, but sticking to existing logic
         transactionId,
         remarks,
       });
@@ -113,6 +127,9 @@ export default function FeeForm({
       setAmount("");
       setTransactionId("");
       setRemarks("");
+      // Refresh status/history if needed
+      if(tab === "studentHistory") loadStudentHistory();
+      if(tab === "status") loadStatus();
     } catch {
       toast.error("Failed to collect fee");
     } finally {
@@ -137,6 +154,7 @@ export default function FeeForm({
         remarks,
       });
       toast.success("Fee record updated");
+      if(tab === "studentHistory") loadStudentHistory();
     } catch {
       toast.error("Failed to update fee record");
     } finally {
@@ -189,14 +207,15 @@ export default function FeeForm({
                </span>
              )}
           </div>
-          <select
-            className={inputClass}
-            value={studentId}
-            onChange={async (e) => {
-                setStudentId(e.target.value);
-                if(e.target.value) {
+          <SearchableSelect
+            options={studentOptions}
+            value={studentId ? Number(studentId) : ""}
+            onChange={async (val) => {
+                const newValue = String(val);
+                setStudentId(newValue);
+                if(newValue) {
                     try {
-                        const res = await API.get(`/api/fee-collection/student-fee-status/${e.target.value}`);
+                        const res = await API.get(`/api/fee-collection/student-fee-status/${newValue}`);
                         setBaseFee(res.data.feeStatus.totalFee);
                         setStatus(res.data);
                     } catch(err) { console.error(err); }
@@ -204,14 +223,8 @@ export default function FeeForm({
                     setBaseFee(null);
                 }
             }}
-          >
-            <option value="">-- Select Student --</option>
-            {students.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.fullName} ({s.studentMobileNo})
-              </option>
-            ))}
-          </select>
+            placeholder="-- Select Student --"
+          />
         </div>
 
         {/* COLLECT FEE */}
@@ -238,16 +251,12 @@ export default function FeeForm({
 
             <div>
               <label className={labelClass}>Payment Method</label>
-              <select
-                className={inputClass}
+              <SearchableSelect
+                options={paymentMethodOptions}
                 value={paymentMethod}
-                onChange={(e) => setPaymentMethod(e.target.value)}
-              >
-                <option>UPI</option>
-                <option>Cash</option>
-                <option>Card</option>
-                <option>Bank Transfer</option>
-              </select>
+                onChange={(val) => setPaymentMethod(String(val))}
+                placeholder="Select Method"
+              />
             </div>
 
             <div>
@@ -360,27 +369,25 @@ export default function FeeForm({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="md:col-span-2">
               <label className={labelClass}>Select Transaction to Edit</label>
-              <select 
-                className={inputClass}
-                onChange={(e) => {
-                    const tx = studentHistory.find(h => h.id === Number(e.target.value));
+              <SearchableSelect
+                options={studentHistory.map(h => ({
+                    value: h.id,
+                    label: `${new Date(h.paymentDate).toLocaleDateString()} — ₹${h.amount} ({h.paymentMethod})`
+                }))}
+                value={editId ? Number(editId) : ""}
+                onChange={(val) => {
+                    const tx = studentHistory.find(h => h.id === Number(val));
                     if (tx) {
                         setEditId(String(tx.id));
                         setAmount(String(tx.amount));
                         if(tx.paymentDate) setPaymentDate(new Date(tx.paymentDate).toISOString().split('T')[0]);
                         setPaymentMethod(tx.paymentMethod);
                         setTransactionId(tx.transactionId || "");
-                        setRemarks(tx.remarks || ""); // Note: backend uses 'remarks' in get-student-history
+                        setRemarks(tx.remarks || ""); 
                     }
                 }}
-              >
-                <option value="">-- Select a Transaction --</option>
-                {studentHistory.map(h => (
-                    <option key={h.id} value={h.id}>
-                        {new Date(h.paymentDate).toLocaleDateString()} — ₹{h.amount} ({h.paymentMethod})
-                    </option>
-                ))}
-              </select>
+                placeholder="-- Select a Transaction --"
+              />
             </div>
             
             {/* Hidden or ReadOnly Edit ID for reference */}
@@ -414,16 +421,12 @@ export default function FeeForm({
 
             <div>
               <label className={labelClass}>Payment Method</label>
-              <select
-                className={inputClass}
+              <SearchableSelect
+                options={paymentMethodOptions}
                 value={paymentMethod}
-                onChange={(e) => setPaymentMethod(e.target.value)}
-              >
-                <option>UPI</option>
-                <option>Cash</option>
-                <option>Card</option>
-                <option>Bank Transfer</option>
-              </select>
+                onChange={(val) => setPaymentMethod(String(val))}
+                placeholder="Select Method"
+              />
             </div>
 
             <div>

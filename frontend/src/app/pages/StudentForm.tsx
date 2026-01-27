@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { API } from "@/lib/api";
 import toast from "react-hot-toast";
+import SearchableSelect from "@/components/SearchableSelect";
 
 export default function StudentForm({ id, onSuccess }: { id?: string; onSuccess?: () => void }) {
   const [data, setData] = useState<any>({
@@ -52,7 +53,7 @@ export default function StudentForm({ id, onSuccess }: { id?: string; onSuccess?
   };
 
   const inputClass =
-    "w-full rounded-xl border border-orange-200 bg-orange-50/60 px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition";
+    "w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-medium text-gray-700 focus:ring-2 focus:ring-orange-100 focus:border-orange-200 outline-none transition-all placeholder:text-gray-400";
 
   const labelClass = "text-sm font-semibold text-orange-700 mb-1 block";
 
@@ -94,23 +95,18 @@ export default function StudentForm({ id, onSuccess }: { id?: string; onSuccess?
             </div>
 
            <div>
-  <label className={labelClass}>Gender</label>
-  <div className="flex gap-6 mt-2">
-    {["Male", "Female", "Other"].map((g) => (
-      <label key={g} className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-        <input
-          type="radio"
-          name="gender"
-          value={g}
-          checked={data.gender === g}
-          onChange={(e) => setData({ ...data, gender: e.target.value })}
-          className="accent-orange-500"
-        />
-        {g}
-      </label>
-    ))}
-  </div>
-</div>
+              <label className={labelClass}>Gender</label>
+              <SearchableSelect
+                options={[
+                  { value: "Male", label: "Male" },
+                  { value: "Female", label: "Female" },
+                  { value: "Other", label: "Other" },
+                ]}
+                value={data.gender}
+                onChange={(val) => setData({ ...data, gender: val })}
+                placeholder="Select Gender"
+              />
+            </div>
 
 
          <div>

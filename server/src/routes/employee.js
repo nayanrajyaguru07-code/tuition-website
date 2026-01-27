@@ -83,6 +83,7 @@ employeeRouter.get("/all-staff", async (req, res) => {
         phone: true,
         role: true, // Role is usually important for the list view
         photoUrl: true, // Nice to have for avatars
+        salary: true,
       },
       orderBy: { createdAt: "desc" },
     });

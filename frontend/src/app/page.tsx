@@ -1,10 +1,10 @@
 import React from "react";
-import AuthPage from "./auth/page";
+import AuthSlider from "./pages/AuthSlider";
 
 const page = () => {
   return (
     <div>
-      <AuthPage />
+      <AuthSlider />
     </div>
   );
 };
