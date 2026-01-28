@@ -155,11 +155,9 @@ studentRouter.put(
   authMiddleware,
   async (req, res) => {
     try {
-      const hostelId = req.user.id; // From token
       const studentId = parseInt(req.params.id);
 
-      // 1. Verify Student Exists & Belongs to this Hostel
-      // We must fetch the student first to check ownership
+      // 1. Verify Student Exists
       const existingStudent = await Prisma.student.findUnique({
         where: { id: studentId },
       });
@@ -168,14 +166,15 @@ studentRouter.put(
         return res.status(404).json({ message: "Student not found" });
       }
 
-      if (existingStudent.hostelId !== hostelId) {
+      // 2. PERMISSION CHECK
+      // If NOT Super Admin AND the student belongs to a different hostel -> Block access
+      if (!req.user.isSuperAdmin && existingStudent.hostelId !== req.user.id) {
         return res
           .status(403)
           .json({ message: "Unauthorized: You cannot edit this student" });
       }
 
-      // 2. Handle New File Uploads (if any)
-      // If the user didn't upload a file, these variables will be null
+      // 3. Handle New File Uploads (if any)
       const [
         newPassportPhoto,
         newIdProof,
@@ -188,8 +187,7 @@ studentRouter.put(
         handleFileUpload(req.files, "parentIdProof"),
       ]);
 
-      // 3. Prepare Update Data Object
-      // We only add fields to 'updateData' if they are present in the request body
+      // 4. Prepare Update Data Object
       const {
         fullName,
         fatherName,
@@ -225,13 +223,12 @@ studentRouter.put(
       if (schoolCollegeName) updateData.schoolCollegeName = schoolCollegeName;
       if (courseClassYear) updateData.courseClassYear = courseClassYear;
 
-      // Only update image URLs if a NEW file was uploaded
       if (newPassportPhoto) updateData.passportPhotoUrl = newPassportPhoto;
       if (newIdProof) updateData.idProofUrl = newIdProof;
       if (newAdmissionProof) updateData.admissionProofUrl = newAdmissionProof;
       if (newParentIdProof) updateData.parentIdProofUrl = newParentIdProof;
 
-      // 4. Update Database
+      // 5. Update Database
       const updatedStudent = await Prisma.student.update({
         where: { id: studentId },
         data: updateData,
@@ -243,14 +240,11 @@ studentRouter.put(
       });
     } catch (error) {
       console.error("Update Student Error:", error);
-
-      // Handle Email Conflict (if user tries to update email to one that already exists)
       if (error.code === "P2002") {
         return res
           .status(400)
           .json({ message: "Email already in use by another student." });
       }
-
       res.status(500).json({ message: "Internal server error" });
     }
   },
@@ -261,23 +255,24 @@ studentRouter.put(
 // ==========================
 studentRouter.get("/all-students", authMiddleware, async (req, res) => {
   try {
-    const hostelId = req.user.id; // From token
+    // Dynamic Filter: Super Admin gets ALL; Normal Admin gets theirs
+    const whereClause = req.user.isSuperAdmin
+      ? {} // Empty = Fetch All
+      : { hostelId: req.user.id }; // Filter by Hostel ID
 
-    // Fetch only specific fields for the list view
     const students = await Prisma.student.findMany({
-      where: {
-        hostelId: hostelId,
-      },
+      where: whereClause,
       select: {
         id: true,
         fullName: true,
         email: true,
         studentMobileNo: true,
-        // Including photoUrl might be nice for a list avatar, but optional
         passportPhotoUrl: true,
+        hostelId: true, // Useful for Super Admin to identify student's hostel
+        createdAt: true,
       },
       orderBy: {
-        createdAt: "desc", // Show newest students first
+        createdAt: "desc",
       },
     });
 
@@ -296,21 +291,19 @@ studentRouter.get("/all-students", authMiddleware, async (req, res) => {
 // ==========================
 studentRouter.get("/get-student/:id", authMiddleware, async (req, res) => {
   try {
-    const hostelId = req.user.id;
     const studentId = parseInt(req.params.id);
 
     if (isNaN(studentId)) {
       return res.status(400).json({ message: "Invalid Student ID" });
     }
 
-    // We use findFirst instead of findUnique here.
-    // This allows us to filter by BOTH id AND hostelId simultaneously.
-    // If a student exists but belongs to a different hostel, this returns null (secure).
+    // Dynamic Filter: Super Admin searches globally; Normal Admin restricted
+    const whereClause = req.user.isSuperAdmin
+      ? { id: studentId }
+      : { id: studentId, hostelId: req.user.id };
+
     const student = await Prisma.student.findFirst({
-      where: {
-        id: studentId,
-        hostelId: hostelId,
-      },
+      where: whereClause,
     });
 
     if (!student) {
@@ -332,15 +325,15 @@ studentRouter.delete(
   authMiddleware,
   async (req, res) => {
     try {
-      const hostelId = req.user.id;
       const studentId = parseInt(req.params.id);
 
-      // 1. Find Student (Security Check)
+      // 1. Find Student & Check Permissions
+      const whereClause = req.user.isSuperAdmin
+        ? { id: studentId }
+        : { id: studentId, hostelId: req.user.id };
+
       const student = await Prisma.student.findFirst({
-        where: {
-          id: studentId,
-          hostelId: hostelId,
-        },
+        where: whereClause,
       });
 
       if (!student) {
@@ -350,7 +343,6 @@ studentRouter.delete(
       }
 
       // 2. Delete Images from Cloudinary
-      // We do this concurrently for better performance
       await Promise.all([
         deleteImage(student.passportPhotoUrl),
         deleteImage(student.idProofUrl),

@@ -1,4 +1,3 @@
-import jwt from "jsonwebtoken";
 import { verifyToken } from "../utils/jwt.js";
 
 const authMiddleware = (req, res, next) => {
@@ -15,8 +14,17 @@ const authMiddleware = (req, res, next) => {
     // 2️⃣ Verify token
     const decoded = verifyToken(token);
 
-    // 3️⃣ Attach decoded payload to request
-    req.user = decoded; // { id, email }
+    // 3️⃣ Check for Super Admin (Hardcoded Check)
+    // We check id == 1 (loose equality) to handle if it comes as number 1 or string "1"
+    const isSuperAdmin =
+      decoded.id == 1 && decoded.email === "admin@tuition.com";
+
+    // 4️⃣ Attach decoded payload + isSuperAdmin flag to request
+    req.user = {
+      ...decoded,
+      isSuperAdmin: isSuperAdmin, // true or false
+    };
+
     next();
   } catch (error) {
     console.error("Auth Middleware Error:", error);

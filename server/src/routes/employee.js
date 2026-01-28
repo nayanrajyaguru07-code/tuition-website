@@ -97,24 +97,53 @@ employeeRouter.post(
 );
 
 // ==========================
-// 2. LIST OF STAFF (GET)
+// 1. GET SINGLE STAFF DETAILS
 // ==========================
-// Returns a lightweight list for your dashboard
+employeeRouter.get("/staff-details/:id", authMiddleware, async (req, res) => {
+  try {
+    const staffId = parseInt(req.params.id);
+
+    // Dynamic Filter: Super Admin searches globally; Normal Admin restricted to their hostel
+    const whereClause = req.user.isSuperAdmin
+      ? { id: staffId } // Super Admin: Just find by ID
+      : { id: staffId, hostelId: req.user.id }; // Normal Admin: Must match ID AND Hostel ID
+
+    const employee = await Prisma.employee.findFirst({
+      where: whereClause,
+    });
+
+    if (!employee) {
+      return res.status(404).json({ message: "Staff member not found" });
+    }
+
+    res.status(200).json({ employee });
+  } catch (error) {
+    console.error("Get Staff Detail Error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// ==========================
+// 2. GET ALL STAFF LIST
+// ==========================
 employeeRouter.get("/all-staff", authMiddleware, async (req, res) => {
   try {
-    const hostelId = req.user.id;
-    // const hostelId = 1;
+    // Dynamic Filter: Super Admin gets ALL; Normal Admin gets theirs
+    const whereClause = req.user.isSuperAdmin
+      ? {} // Super Admin: No filter (Fetch all employees)
+      : { hostelId: req.user.id }; // Normal Admin: Only their employees
 
     const staffList = await Prisma.employee.findMany({
-      where: { hostelId: hostelId },
+      where: whereClause,
       select: {
         id: true,
         name: true,
         email: true,
         phone: true,
-        role: true, // Role is usually important for the list view
-        photoUrl: true, // Nice to have for avatars
+        role: true,
+        photoUrl: true,
         salary: true,
+        hostelId: true, // Useful for Super Admin to know which hostel they belong to
       },
       orderBy: { createdAt: "desc" },
     });
@@ -130,36 +159,7 @@ employeeRouter.get("/all-staff", authMiddleware, async (req, res) => {
 });
 
 // ==========================
-// 3. STAFF DETAILS (GET)
-// ==========================
-// Returns full profile of one employee
-employeeRouter.get("/staff-details/:id", authMiddleware, async (req, res) => {
-  try {
-    const hostelId = req.user.id;
-    // const hostelId = 1;
-
-    const staffId = parseInt(req.params.id);
-
-    const employee = await Prisma.employee.findFirst({
-      where: {
-        id: staffId,
-        hostelId: hostelId,
-      },
-    });
-
-    if (!employee) {
-      return res.status(404).json({ message: "Staff member not found" });
-    }
-
-    res.status(200).json({ employee });
-  } catch (error) {
-    console.error("Get Staff Detail Error:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-});
-
-// ==========================
-// 4. UPDATE STAFF (PUT)
+// 3. UPDATE STAFF
 // ==========================
 employeeRouter.put(
   "/update-staff/:id",
@@ -167,18 +167,21 @@ employeeRouter.put(
   uploadFields,
   async (req, res) => {
     try {
-      const hostelId = req.user.id;
-      // const hostelId = 1;
-
       const staffId = parseInt(req.params.id);
 
       // 1. Verify Existence & Ownership
+      const whereClause = req.user.isSuperAdmin
+        ? { id: staffId }
+        : { id: staffId, hostelId: req.user.id };
+
       const existingStaff = await Prisma.employee.findFirst({
-        where: { id: staffId, hostelId: hostelId },
+        where: whereClause,
       });
 
       if (!existingStaff) {
-        return res.status(404).json({ message: "Staff not found" });
+        return res
+          .status(404)
+          .json({ message: "Staff not found or access denied" });
       }
 
       // 2. Handle Image Upload
@@ -215,8 +218,8 @@ employeeRouter.put(
       if (role) updateData.role = role;
       if (salary) updateData.salary = parseFloat(salary);
       if (dateOfJoining) updateData.dateOfJoining = new Date(dateOfJoining);
-      if (newPhotoUrl) updateData.photoUrl = newPhotoUrl; // Only update if new photo exists
-      if (newIdProofUrl) updateData.idProofUrl = newIdProofUrl; // Only update if new ID proof exists
+      if (newPhotoUrl) updateData.photoUrl = newPhotoUrl;
+      if (newIdProofUrl) updateData.idProofUrl = newIdProofUrl;
 
       // 4. Update DB
       const updatedStaff = await Prisma.employee.update({
@@ -236,22 +239,25 @@ employeeRouter.put(
 );
 
 // ==========================
-// 5. DELETE STAFF (DELETE)
+// 4. DELETE STAFF
 // ==========================
 employeeRouter.delete("/delete-staff/:id", authMiddleware, async (req, res) => {
   try {
-    const hostelId = req.user.id;
-    // const hostelId = 1;
-
     const staffId = parseInt(req.params.id);
 
     // 1. Verify Existence & Ownership
+    const whereClause = req.user.isSuperAdmin
+      ? { id: staffId }
+      : { id: staffId, hostelId: req.user.id };
+
     const employee = await Prisma.employee.findFirst({
-      where: { id: staffId, hostelId: hostelId },
+      where: whereClause,
     });
 
     if (!employee) {
-      return res.status(404).json({ message: "Staff member not found" });
+      return res
+        .status(404)
+        .json({ message: "Staff member not found or access denied" });
     }
 
     // 2. Delete Image from Cloudinary (if exists)

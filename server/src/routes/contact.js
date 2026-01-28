@@ -7,14 +7,18 @@ const contactRouter = express.Router();
 // GET /api/contacts/all
 contactRouter.get("/all", authMiddleware, async (req, res) => {
   try {
-    const hostelId = req.user.id;
-    // const hostelId = 1;
+    // 1️⃣ Dynamic Filter Logic
+    let whereClause = {};
 
-    // 1. Fetch Students (Student & Parent data comes from here)
+    // If NOT Super Admin, filter by their specific Hostel ID
+    if (!req.user.isSuperAdmin) {
+      whereClause = { hostelId: req.user.id };
+    }
+    // If Super Admin, 'whereClause' remains empty {}, fetching ALL data
+
+    // 2️⃣ Fetch Students (Apply Filter)
     const students = await Prisma.student.findMany({
-      where: {
-        hostelId: hostelId,
-      },
+      where: whereClause,
       select: {
         id: true,
         fullName: true,
@@ -25,11 +29,9 @@ contactRouter.get("/all", authMiddleware, async (req, res) => {
       },
     });
 
-    // 2. Fetch Staff
+    // 3️⃣ Fetch Staff (Apply Filter)
     const staff = await Prisma.employee.findMany({
-      where: {
-        hostelId: hostelId,
-      },
+      where: whereClause,
       select: {
         id: true,
         name: true,
@@ -38,7 +40,7 @@ contactRouter.get("/all", authMiddleware, async (req, res) => {
       },
     });
 
-    // --- 3. Construct the 3 Separate Arrays ---
+    // --- 4. Construct the 3 Separate Arrays ---
 
     // Array 1: Students
     const studentList = students
@@ -47,7 +49,6 @@ contactRouter.get("/all", authMiddleware, async (req, res) => {
         id: student.id,
         name: student.fullName,
         mobile: student.studentMobileNo,
-        // description: `Course: ${student.courseClassYear || "N/A"}`,
         course: student.courseClassYear,
       }));
 
@@ -59,7 +60,6 @@ contactRouter.get("/all", authMiddleware, async (req, res) => {
         name: student.fatherName,
         childName: student.fullName, // Helpful to know which student belongs to this parent
         mobile: student.fatherPhoneNo,
-        // description: `Parent of: ${student.fullName}`,
       }));
 
     // Array 3: Staff
@@ -69,13 +69,13 @@ contactRouter.get("/all", authMiddleware, async (req, res) => {
         id: member.id,
         name: member.name,
         mobile: member.phone, // ✅ FIXED: Changed 'member.mobile' to 'member.phone'
-        // description: member.role || "Staff Member",
         role: member.role || "Staff Member",
       }));
 
-    // 4. Send response with 3 distinct keys
+    // 5. Send response with 3 distinct keys
     res.status(200).json({
       success: true,
+      isSuperAdmin: req.user.isSuperAdmin, // Useful for frontend debugging
       counts: {
         students: studentList.length,
         parents: parentList.length,
