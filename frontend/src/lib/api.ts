@@ -42,7 +42,7 @@ API.interceptors.response.use(
     if (typeof window !== "undefined") {
       if (error.response?.status === 401) {
         // 🔐 Auto logout on token expiry
-        localStorage.removeItem("token"); // safer than clear()
+        localStorage.clear();
         window.location.href = "/auth";
       }
     }

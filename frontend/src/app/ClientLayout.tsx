@@ -23,7 +23,7 @@ export default function ClientLayout({
     const isPublicRoute = pathname === "/" || pathname === "/admin/login";
 
     if (!token && !isPublicRoute) {
-       router.push("/");
+      router.push("/");
     }
   }, [pathname, router]);
 
@@ -34,13 +34,19 @@ export default function ClientLayout({
           Actually Header.tsx has specific logic for hidden. 
           Let's rely on Header to render null if needed, but we need to know for margin.
       */}
-      
+
       {!isFullScreen && <Header />}
 
       {/* Main Content */}
-      <main className={`flex-1 transition-all duration-300 ${!isFullScreen ? "md:ml-64" : ""}`}>
+      <main
+        className={`flex-1 transition-all duration-300 ${!isFullScreen ? "pt-16" : ""}`}
+      >
         {children}
-        {!isFullScreen && <div className="mt-10"><Footer /></div>}
+        {!isFullScreen && (
+          <div className="mt-10">
+            <Footer />
+          </div>
+        )}
       </main>
     </div>
   );

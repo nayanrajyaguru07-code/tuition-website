@@ -4,7 +4,6 @@ import { useState, FormEvent } from "react";
 import { API } from "@/lib/api";
 import toast from "react-hot-toast";
 import { Loader2 } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export default function AuthSlider() {
@@ -56,17 +55,15 @@ export default function AuthSlider() {
       toast.success("Admin login successful");
       router.push("/admin/dashboard");
     } catch (err: any) {
-      toast.error(err.response?.data?.error || err.response?.data?.message || "Invalid Credentials");
+      toast.error(
+        err.response?.data?.error ||
+          err.response?.data?.message ||
+          "Invalid Credentials",
+      );
     } finally {
       setLoading(false);
     }
   };
-
-  // HELPERS FOR SLIDING
-  // order: Admin (0) | Login (1)
-  // width: 200%
-  // 0% -> Admin
-  // -50% -> Login
 
   const getTranslateData = () => {
     if (activeView === "admin") return "translate-x-0";
@@ -85,13 +82,27 @@ export default function AuthSlider() {
           <div className="w-1/2 flex items-center justify-center px-6 bg-gradient-to-br from-gray-50 to-gray-100">
             <div className="w-full max-w-sm bg-white rounded-2xl shadow-lg border border-gray-200 p-7">
               <div className="flex flex-col items-center mb-4">
-                <div 
-                   className="w-14 h-14 bg-orange-100 rounded-full flex items-center justify-center mb-2 text-orange-600"
-                >
-                   {/* ShieldCheck icon removed import above? No, kept Loader2. Need ShieldCheck too */}
-                   <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-shield-check"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/></svg>
+                <div className="w-14 h-14 bg-orange-100 rounded-full flex items-center justify-center mb-2 text-orange-600">
+                  {/* ShieldCheck icon removed import above? No, kept Loader2. Need ShieldCheck too */}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="28"
+                    height="28"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="lucide lucide-shield-check"
+                  >
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
+                    <path d="m9 12 2 2 4-4" />
+                  </svg>
                 </div>
-                <h2 className="text-2xl font-extrabold text-gray-900">Admin Portal</h2>
+                <h2 className="text-2xl font-extrabold text-gray-900">
+                  Admin Portal
+                </h2>
               </div>
 
               <form onSubmit={handleAdminLogin}>
@@ -124,7 +135,11 @@ export default function AuthSlider() {
                   disabled={loading}
                   className="w-full inline-flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-900 text-white py-2.5 rounded-xl font-semibold shadow-md transition disabled:opacity-60 mb-4"
                 >
-                  {loading ? <Loader2 className="animate-spin" size={18} /> : "Admin Login"}
+                  {loading ? (
+                    <Loader2 className="animate-spin" size={18} />
+                  ) : (
+                    "Admin Login"
+                  )}
                 </button>
               </form>
 

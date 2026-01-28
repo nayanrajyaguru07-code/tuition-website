@@ -18,14 +18,14 @@ type Feature = {
 const features = [
   {
     title: "Add Student",
-    description: "Register a new student with documents",
+    description: "Register a new student",
     href: "/students/add",
     icon: <UserPlus size={26} />,
     bg: "bg-orange-50",
     iconBg: "from-orange-400 to-orange-500",
     glow: "from-orange-300/40 to-orange-400/40",
   },
-   {
+  {
     title: "Add Fee",
     description: "Collect student fees",
     href: "/fee/add",
@@ -35,35 +35,44 @@ const features = [
     glow: "from-red-300/40 to-red-400/40",
   },
   {
-    title: "Fee History",
-    description: "View fee records",
-    href: "/fee",
-    icon: <Wallet size={26} />,
-    bg: "bg-orange-50",
-    iconBg: "from-orange-400 to-orange-500",
-    glow: "from-orange-300/40 to-orange-400/40",
+    title: "Add Staff",
+    description: "Register a new staff member",
+    href: "/staff/add",
+    icon: <Briefcase size={26} />,
+    bg: "bg-amber-50",
+    iconBg: "from-amber-400 to-amber-500",
+    glow: "from-amber-300/40 to-amber-400/40",
   },
   {
-    title:"staff salary",
-    description:"View staff salary",
-    href:"/salary",
-    icon:<Wallet size={26} />,
-    bg:"bg-red-50",
-    iconBg:"from-red-400 to-red-500",
-    glow:"from-red-300/40 to-red-400/40",
+    title: "Add Expense",
+    description: "Record a new expense",
+    href: "/expenses/add",
+    icon: <Wallet size={26} />,
+    bg: "bg-rose-50",
+    iconBg: "from-rose-400 to-rose-500",
+    glow: "from-rose-300/40 to-rose-400/40",
   },
   {
     title: "View Students",
     description: "List all registered students",
     href: "/students",
     icon: <Users size={26} />,
+    bg: "bg-orange-50",
+    iconBg: "from-orange-400 to-orange-500",
+    glow: "from-orange-300/40 to-orange-400/40",
+  },
+  {
+    title: "Fee History",
+    description: "View fee records",
+    href: "/fee",
+    icon: <Wallet size={26} />,
     bg: "bg-red-50",
     iconBg: "from-red-400 to-red-500",
     glow: "from-red-300/40 to-red-400/40",
   },
   {
-    title: "Staff Management",
-    description: "Add, update or remove staff",
+    title: "View Staff",
+    description: "Manage staff details",
     href: "/staff",
     icon: <Briefcase size={26} />,
     bg: "bg-amber-50",
@@ -71,50 +80,44 @@ const features = [
     glow: "from-amber-300/40 to-amber-400/40",
   },
   {
-    title: "Expense Tracker",
-    description: "Track and manage hostel expenses",
+    title: "Staff Salary",
+    description: "Manage salary payments",
+    href: "/salary",
+    icon: <Wallet size={26} />,
+    bg: "bg-amber-50",
+    iconBg: "from-amber-400 to-amber-500",
+    glow: "from-amber-300/40 to-amber-400/40",
+  },
+  {
+    title: "View Expenses",
+    description: "Track all hostel expenses",
     href: "/expenses",
     icon: <Wallet size={26} />,
     bg: "bg-rose-50",
     iconBg: "from-rose-400 to-rose-500",
     glow: "from-rose-300/40 to-rose-400/40",
   },
- 
 ];
-
-// Features visible to Guests (Not Logged In)
-// REMOVED as per request - Route is now protected
 
 export default function Home() {
   // Since ClientLayout protects this route, we can assume user is logged in or being redirected.
   const [isAdmin, setIsAdmin] = useState(false);
 
-  useEffect(() => {
-    API.get("/api/auth/me")
-      .then((res) => {
-        if (res.data?.hostel?.email === "admin@tuition.com") {
-          setIsAdmin(true);
-        }
-      })
-      .catch((err) => console.error(err));
-  }, []);
-
   const visibleFeatures = features.filter(
-    (f) => f.title !== "Dashboard" || isAdmin
+    (f) => f.title !== "Dashboard" || isAdmin,
   );
-  
+
   return (
     <div className="min-h-screen p-6 md:p-10">
       {/* HEADER GREETING */}
       <div className="max-w-7xl mx-auto mb-10 text-center md:text-left">
-          <h1 className="text-3xl font-bold text-gray-900">
-             Welcome Back, Manager 👋
-          </h1>
-          <p className="text-gray-500 mt-2">
-             Select an action to proceed with your daily tasks.
-          </p>
-        </div>
-        
+        <h1 className="text-3xl font-bold text-gray-900">
+          Welcome Back, Manager 👋
+        </h1>
+        <p className="text-gray-500 mt-2">
+          Select an action to proceed with your daily tasks.
+        </p>
+      </div>
 
       {/* FEATURE GRID */}
       <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
