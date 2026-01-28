@@ -128,8 +128,8 @@ export default function FeeForm({ initialTab = "collect" }: FeeFormProps) {
       setTransactionId("");
       setRemarks("");
       // Refresh status/history if needed
-      if(tab === "studentHistory") loadStudentHistory();
-      if(tab === "status") loadStatus();
+      if (tab === "studentHistory") loadStudentHistory();
+      if (tab === "status") loadStatus();
     } catch {
       toast.error("Failed to collect fee");
     } finally {
@@ -154,7 +154,7 @@ export default function FeeForm({ initialTab = "collect" }: FeeFormProps) {
         remarks,
       });
       toast.success("Fee record updated");
-      if(tab === "studentHistory") loadStudentHistory();
+      if (tab === "studentHistory") loadStudentHistory();
     } catch {
       toast.error("Failed to update fee record");
     } finally {
@@ -187,7 +187,7 @@ export default function FeeForm({ initialTab = "collect" }: FeeFormProps) {
               onClick={() => setTab(key as any)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
                 tab === key
-                  ? "bg-blue-600 text-white"
+                  ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md"
                   : "bg-gray-100 hover:bg-gray-200"
               }`}
             >
@@ -199,28 +199,32 @@ export default function FeeForm({ initialTab = "collect" }: FeeFormProps) {
         {/* STUDENT SELECTOR */}
         <div className="mb-6">
           <div className="flex justify-between items-center mb-1">
-             <label className={labelClass}>Select Student</label>
-             {baseFee !== null && (
-               <span className="text-xs font-semibold text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full border border-orange-100">
-                 Base Fee: ₹{baseFee}
-               </span>
-             )}
+            <label className={labelClass}>Select Student</label>
+            {baseFee !== null && (
+              <span className="text-xs font-semibold text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full border border-orange-100">
+                Base Fee: ₹{baseFee}
+              </span>
+            )}
           </div>
           <SearchableSelect
             options={studentOptions}
             value={studentId ? Number(studentId) : ""}
             onChange={async (val) => {
-                const newValue = String(val);
-                setStudentId(newValue);
-                if(newValue) {
-                    try {
-                        const res = await API.get(`/api/fee-collection/student-fee-status/${newValue}`);
-                        setBaseFee(res.data.feeStatus.totalFee);
-                        setStatus(res.data);
-                    } catch(err) { console.error(err); }
-                } else {
-                    setBaseFee(null);
+              const newValue = String(val);
+              setStudentId(newValue);
+              if (newValue) {
+                try {
+                  const res = await API.get(
+                    `/api/fee-collection/student-fee-status/${newValue}`,
+                  );
+                  setBaseFee(res.data.feeStatus.totalFee);
+                  setStatus(res.data);
+                } catch (err) {
+                  console.error(err);
                 }
+              } else {
+                setBaseFee(null);
+              }
             }}
             placeholder="-- Select Student --"
           />
@@ -279,7 +283,7 @@ export default function FeeForm({ initialTab = "collect" }: FeeFormProps) {
             <button
               onClick={collectFee}
               disabled={loading}
-              className="md:col-span-2 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold transition disabled:opacity-50"
+              className="md:col-span-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white py-3 rounded-xl font-semibold transition disabled:opacity-50 shadow-md"
             >
               {loading ? "Processing..." : "Collect Fee"}
             </button>
@@ -323,7 +327,7 @@ export default function FeeForm({ initialTab = "collect" }: FeeFormProps) {
           <div className="space-y-4">
             <button
               onClick={loadStudentHistory}
-              className="bg-blue-600 text-white px-5 py-2 rounded-lg"
+              className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-5 py-2 rounded-lg shadow-sm"
             >
               Load History
             </button>
@@ -347,7 +351,7 @@ export default function FeeForm({ initialTab = "collect" }: FeeFormProps) {
           <div className="space-y-4">
             <button
               onClick={loadStatus}
-              className="bg-blue-600 text-white px-5 py-2 rounded-lg"
+              className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-5 py-2 rounded-lg shadow-sm"
             >
               Check Status
             </button>
@@ -369,26 +373,29 @@ export default function FeeForm({ initialTab = "collect" }: FeeFormProps) {
             <div className="md:col-span-2">
               <label className={labelClass}>Select Transaction to Edit</label>
               <SearchableSelect
-                options={studentHistory.map(h => ({
-                    value: h.id,
-                    label: `${new Date(h.paymentDate).toLocaleDateString()} — ₹${h.amount} ({h.paymentMethod})`
+                options={studentHistory.map((h) => ({
+                  value: h.id,
+                  label: `${new Date(h.paymentDate).toLocaleDateString()} — ₹${h.amount} ({h.paymentMethod})`,
                 }))}
                 value={editId ? Number(editId) : ""}
                 onChange={(val) => {
-                    const tx = studentHistory.find(h => h.id === Number(val));
-                    if (tx) {
-                        setEditId(String(tx.id));
-                        setAmount(String(tx.amount));
-                        if(tx.paymentDate) setPaymentDate(new Date(tx.paymentDate).toISOString().split('T')[0]);
-                        setPaymentMethod(tx.paymentMethod);
-                        setTransactionId(tx.transactionId || "");
-                        setRemarks(tx.remarks || ""); 
-                    }
+                  const tx = studentHistory.find((h) => h.id === Number(val));
+                  if (tx) {
+                    setEditId(String(tx.id));
+                    setAmount(String(tx.amount));
+                    if (tx.paymentDate)
+                      setPaymentDate(
+                        new Date(tx.paymentDate).toISOString().split("T")[0],
+                      );
+                    setPaymentMethod(tx.paymentMethod);
+                    setTransactionId(tx.transactionId || "");
+                    setRemarks(tx.remarks || "");
+                  }
                 }}
                 placeholder="-- Select a Transaction --"
               />
             </div>
-            
+
             {/* Hidden or ReadOnly Edit ID for reference */}
             <div className="hidden">
               <label className={labelClass}>Record ID</label>
@@ -449,7 +456,7 @@ export default function FeeForm({ initialTab = "collect" }: FeeFormProps) {
             <button
               onClick={updateFee}
               disabled={loading}
-              className="md:col-span-2 bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-semibold transition disabled:opacity-50"
+              className="md:col-span-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white py-3 rounded-xl font-semibold transition disabled:opacity-50 shadow-md"
             >
               {loading ? "Updating..." : "Update Fee Record"}
             </button>

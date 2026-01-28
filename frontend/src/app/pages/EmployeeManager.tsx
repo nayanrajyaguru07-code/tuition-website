@@ -140,7 +140,7 @@ export default function EmployeeManager({
               disabled={t === "edit" && !selectedId}
               className={`px-4 py-2 rounded-lg text-sm font-medium ${
                 tab === t
-                  ? "bg-blue-600 text-white"
+                  ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md"
                   : "bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
               }`}
             >
@@ -157,26 +157,26 @@ export default function EmployeeManager({
             {employees.map((e) => (
               <div
                 key={e.id}
-                className="border rounded-xl p-5 shadow hover:shadow-lg transition"
+                className="border border-orange-50 rounded-xl p-5 shadow hover:shadow-lg transition flex flex-col"
               >
                 <img
                   src={e.photoUrl}
-                  className="w-20 h-20 rounded-full object-cover mb-3"
+                  className="w-20 h-20 rounded-full object-cover mb-3 border border-orange-100"
                 />
-                <div className="font-semibold">{e.name}</div>
+                <div className="font-semibold text-gray-900">{e.name}</div>
                 <div className="text-sm text-gray-500">{e.email}</div>
-                <div className="text-sm text-gray-600">{e.role}</div>
+                <div className="text-sm text-gray-600 mb-4">{e.role}</div>
 
-                <div className="flex gap-3 mt-4">
+                <div className="mt-auto flex gap-3">
                   <button
                     onClick={() => loadEmployeeDetails(e.id)}
-                    className="flex-1 bg-blue-600 text-white py-2 rounded-lg text-sm"
+                    className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white py-2 rounded-lg text-sm shadow-sm transition-all"
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => deleteEmployee(e.id)}
-                    className="flex-1 border border-red-400 text-red-600 py-2 rounded-lg text-sm"
+                    className="flex-1 border border-red-200 text-red-600 hover:bg-red-50 py-2 rounded-lg text-sm transition-colors"
                   >
                     Delete
                   </button>
@@ -291,7 +291,7 @@ export default function EmployeeManager({
             <button
               onClick={submitAdd}
               disabled={loading}
-              className="md:col-span-2 bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-xl font-semibold transition disabled:opacity-50"
+              className="md:col-span-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white py-3 rounded-xl font-semibold transition disabled:opacity-50 shadow-md"
             >
               {loading ? "Adding..." : "Add Employee"}
             </button>
@@ -413,7 +413,7 @@ export default function EmployeeManager({
             <button
               onClick={submitUpdate}
               disabled={loading}
-              className="md:col-span-2 bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-semibold transition disabled:opacity-50"
+              className="md:col-span-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white py-3 rounded-xl font-semibold transition disabled:opacity-50 shadow-md"
             >
               {loading ? "Updating..." : "Update Employee"}
             </button>

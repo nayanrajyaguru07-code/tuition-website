@@ -3,7 +3,12 @@
 import { useEffect, useState } from "react";
 import { API } from "@/lib/api";
 import toast from "react-hot-toast";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import SearchableSelect from "@/components/SearchableSelect";
 
 type Expense = {
@@ -20,7 +25,9 @@ interface ExpenseManagerProps {
   initialTab?: "list" | "add";
 }
 
-export default function ExpenseManager({ initialTab = "list" }: ExpenseManagerProps) {
+export default function ExpenseManager({
+  initialTab = "list",
+}: ExpenseManagerProps) {
   const [tab, setTab] = useState<"list" | "add">(initialTab);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -114,9 +121,6 @@ export default function ExpenseManager({ initialTab = "list" }: ExpenseManagerPr
     }
   };
 
-
-
-
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-lg p-8">
@@ -130,7 +134,7 @@ export default function ExpenseManager({ initialTab = "list" }: ExpenseManagerPr
               onClick={() => setTab(t as any)}
               className={`px-4 py-2 rounded-lg text-sm font-medium ${
                 tab === t
-                  ? "bg-blue-600 text-white"
+                  ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md"
                   : "bg-gray-100 hover:bg-gray-200"
               }`}
             >
@@ -167,13 +171,13 @@ export default function ExpenseManager({ initialTab = "list" }: ExpenseManagerPr
                     <td className="p-3 flex gap-2">
                       <button
                         onClick={() => loadExpenseDetails(e)}
-                        className="bg-blue-600 text-white px-3 py-1 rounded text-xs"
+                        className="bg-orange-100 text-orange-700 hover:bg-orange-200 px-3 py-1 rounded text-xs font-semibold"
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => deleteExpense(e.id)}
-                        className="border border-red-400 text-red-600 px-3 py-1 rounded text-xs"
+                        className="border border-red-200 text-red-600 hover:bg-red-50 px-3 py-1 rounded text-xs"
                       >
                         Delete
                       </button>
@@ -190,21 +194,29 @@ export default function ExpenseManager({ initialTab = "list" }: ExpenseManagerPr
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
               <label className={labelClass}>Title</label>
-              <input name="title" className={inputClass} onChange={handleChange} />
+              <input
+                name="title"
+                className={inputClass}
+                onChange={handleChange}
+              />
             </div>
-            
+
             <div>
               <label className={labelClass}>Amount</label>
-              <input name="amount" className={inputClass} onChange={handleChange} />
+              <input
+                name="amount"
+                className={inputClass}
+                onChange={handleChange}
+              />
             </div>
 
             <div>
               <label className={labelClass}>Expense Date</label>
               <input
-                 type="date"
-                 name="expenseDate"
-                 className={inputClass}
-                 onChange={handleChange}
+                type="date"
+                name="expenseDate"
+                className={inputClass}
+                onChange={handleChange}
               />
             </div>
 
@@ -220,7 +232,9 @@ export default function ExpenseManager({ initialTab = "list" }: ExpenseManagerPr
                   { value: "Other", label: "Other" },
                 ]}
                 value={form.category}
-                onChange={(val) => handleChange({ target: { name: "category", value: val } })}
+                onChange={(val) =>
+                  handleChange({ target: { name: "category", value: val } })
+                }
                 placeholder="Select Category"
               />
             </div>
@@ -235,7 +249,11 @@ export default function ExpenseManager({ initialTab = "list" }: ExpenseManagerPr
                   { value: "Bank Transfer", label: "Bank Transfer" },
                 ]}
                 value={form.paymentMethod}
-                onChange={(val) => handleChange({ target: { name: "paymentMethod", value: val } })}
+                onChange={(val) =>
+                  handleChange({
+                    target: { name: "paymentMethod", value: val },
+                  })
+                }
                 placeholder="Select Method"
               />
             </div>
@@ -251,7 +269,7 @@ export default function ExpenseManager({ initialTab = "list" }: ExpenseManagerPr
 
             <button
               onClick={submitAdd}
-              className="md:col-span-2 bg-orange-600 text-white py-3 rounded-xl hover:bg-orange-700 transition font-semibold"
+              className="md:col-span-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white py-3 rounded-xl transition font-semibold shadow-md"
             >
               Add Expense
             </button>
@@ -260,77 +278,99 @@ export default function ExpenseManager({ initialTab = "list" }: ExpenseManagerPr
 
         {/* EDIT DIALOG */}
         <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-           <DialogContent>
-             <DialogHeader>
-               <DialogTitle>Edit Expense</DialogTitle>
-             </DialogHeader>
-             
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-5 py-4">
-                 <div>
-                    <label className={labelClass}>Title</label>
-                    <input name="title" value={form.title} className={inputClass} onChange={handleChange} />
-                 </div>
-                 
-                 <div>
-                    <label className={labelClass}>Amount</label>
-                    <input name="amount" value={form.amount} className={inputClass} onChange={handleChange} />
-                 </div>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Expense</DialogTitle>
+            </DialogHeader>
 
-                 <div>
-                    <label className={labelClass}>Expense Date</label>
-                    <input name="expenseDate" type="date" value={form.expenseDate} className={inputClass} onChange={handleChange} />
-                 </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 py-4">
+              <div>
+                <label className={labelClass}>Title</label>
+                <input
+                  name="title"
+                  value={form.title}
+                  className={inputClass}
+                  onChange={handleChange}
+                />
+              </div>
 
-                 <div>
-                    <label className={labelClass}>Category</label>
-                    <SearchableSelect
-                      options={[
-                        { value: "General", label: "General" },
-                        { value: "Maintenance", label: "Maintenance" },
-                        { value: "Food", label: "Food" },
-                        { value: "Utilities", label: "Utilities" },
-                        { value: "Salary", label: "Salary" },
-                        { value: "Other", label: "Other" },
-                      ]}
-                      value={form.category}
-                      onChange={(val) => handleChange({ target: { name: "category", value: val } })}
-                      placeholder="Select Category"
-                    />
-                 </div>
+              <div>
+                <label className={labelClass}>Amount</label>
+                <input
+                  name="amount"
+                  value={form.amount}
+                  className={inputClass}
+                  onChange={handleChange}
+                />
+              </div>
 
-                 <div>
-                    <label className={labelClass}>Payment Method</label>
-                    <SearchableSelect
-                      options={[
-                        { value: "Cash", label: "Cash" },
-                        { value: "UPI", label: "UPI" },
-                        { value: "Card", label: "Card" },
-                        { value: "Bank Transfer", label: "Bank Transfer" },
-                      ]}
-                      value={form.paymentMethod}
-                      onChange={(val) => handleChange({ target: { name: "paymentMethod", value: val } })}
-                      placeholder="Select Method"
-                    />
-                 </div>
+              <div>
+                <label className={labelClass}>Expense Date</label>
+                <input
+                  name="expenseDate"
+                  type="date"
+                  value={form.expenseDate}
+                  className={inputClass}
+                  onChange={handleChange}
+                />
+              </div>
 
-                 <div className="md:col-span-2">
-                    <label className={labelClass}>Description</label>
-                    <textarea
-                      name="description"
-                      value={form.description}
-                      className={inputClass}
-                      onChange={handleChange}
-                    />
-                 </div>
+              <div>
+                <label className={labelClass}>Category</label>
+                <SearchableSelect
+                  options={[
+                    { value: "General", label: "General" },
+                    { value: "Maintenance", label: "Maintenance" },
+                    { value: "Food", label: "Food" },
+                    { value: "Utilities", label: "Utilities" },
+                    { value: "Salary", label: "Salary" },
+                    { value: "Other", label: "Other" },
+                  ]}
+                  value={form.category}
+                  onChange={(val) =>
+                    handleChange({ target: { name: "category", value: val } })
+                  }
+                  placeholder="Select Category"
+                />
+              </div>
 
-                 <button
-                   onClick={submitUpdate}
-                   className="md:col-span-2 bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700 transition"
-                 >
-                   Update Expense
-                 </button>
-             </div>
-           </DialogContent>
+              <div>
+                <label className={labelClass}>Payment Method</label>
+                <SearchableSelect
+                  options={[
+                    { value: "Cash", label: "Cash" },
+                    { value: "UPI", label: "UPI" },
+                    { value: "Card", label: "Card" },
+                    { value: "Bank Transfer", label: "Bank Transfer" },
+                  ]}
+                  value={form.paymentMethod}
+                  onChange={(val) =>
+                    handleChange({
+                      target: { name: "paymentMethod", value: val },
+                    })
+                  }
+                  placeholder="Select Method"
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className={labelClass}>Description</label>
+                <textarea
+                  name="description"
+                  value={form.description}
+                  className={inputClass}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <button
+                onClick={submitUpdate}
+                className="md:col-span-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white py-3 rounded-xl font-semibold transition shadow-md"
+              >
+                Update Expense
+              </button>
+            </div>
+          </DialogContent>
         </Dialog>
       </div>
     </div>

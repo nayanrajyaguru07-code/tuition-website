@@ -66,7 +66,7 @@ export default function StudentForm({
   const labelClass = "text-sm font-medium text-gray-700";
 
   const fileClass =
-    "block w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer";
+    "block w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100 cursor-pointer transition-colors";
 
   return (
     <div className="p-1">
@@ -353,7 +353,7 @@ export default function StudentForm({
         <button
           onClick={submit}
           disabled={loading}
-          className="w-full rounded-xl bg-blue-600 hover:bg-blue-700 text-white py-3 text-lg font-semibold transition disabled:opacity-50"
+          className="w-full rounded-xl bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white py-3 text-lg font-semibold transition disabled:opacity-50 shadow-md"
         >
           {loading ? "Saving..." : id ? "Update Student" : "Add Student"}
         </button>

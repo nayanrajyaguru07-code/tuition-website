@@ -60,12 +60,12 @@ export default function StudentList() {
               placeholder="Search students..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
 
             <button
               onClick={() => setEditingId("new")}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
+              className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md transition-all"
             >
               + Add Student
             </button>
@@ -86,13 +86,13 @@ export default function StudentList() {
             {filtered.map((s) => (
               <div
                 key={s.id}
-                className="bg-white rounded-xl shadow hover:shadow-lg transition p-5 flex flex-col"
+                className="bg-white rounded-xl shadow hover:shadow-lg transition p-5 flex flex-col border border-orange-50"
               >
                 <div className="flex items-center gap-4 mb-4">
                   <img
                     src={s.passportPhotoUrl || "/avatar.png"}
                     alt={s.fullName}
-                    className="w-14 h-14 rounded-full object-cover border"
+                    className="w-14 h-14 rounded-full object-cover border border-orange-100"
                   />
 
                   <div className="flex-1">
@@ -110,7 +110,7 @@ export default function StudentList() {
                 <div className="mt-auto flex gap-3">
                   <button
                     onClick={() => setEditingId(String(s.id))}
-                    className="flex-1 text-center bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-medium"
+                    className="flex-1 text-center bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white py-2 rounded-lg text-sm font-medium shadow-sm transition-all"
                   >
                     Edit
                   </button>
