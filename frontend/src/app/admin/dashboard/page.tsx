@@ -1,5 +1,6 @@
 "use client";
 
+import SuperAdminGuard from "@/components/SuperAdminGuard";
 import { useEffect, useState, ReactNode } from "react";
 import { API } from "@/lib/api";
 import {
@@ -30,6 +31,7 @@ import {
   LogOut,
   Menu,
   X,
+  Lock,
 } from "lucide-react";
 import StudentView from "@/app/pages/StudentView";
 import StaffView from "@/app/pages/StaffView";
@@ -76,6 +78,12 @@ export default function AdminDashboard() {
   const [newHostelName, setNewHostelName] = useState("");
   const [newHostelEmail, setNewHostelEmail] = useState("");
   const [newHostelPassword, setNewHostelPassword] = useState("");
+  
+  // Reset Password State
+  const [isResetPasswordDialogOpen, setIsResetPasswordDialogOpen] = useState(false);
+  const [resetHostelId, setResetHostelId] = useState("");
+  const [resetNewPassword, setResetNewPassword] = useState("");
+  const [resetConfirmPassword, setResetConfirmPassword] = useState("");
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -163,6 +171,41 @@ export default function AdminDashboard() {
       ]
     : [];
 
+  // Reset Password Handler
+  const handleOpenResetPassword = () => {
+    setResetHostelId("");
+    setResetNewPassword("");
+    setResetConfirmPassword("");
+    setIsResetPasswordDialogOpen(true);
+  };
+
+  const handleResetPassword = async () => {
+    if (!resetHostelId || !resetNewPassword || !resetConfirmPassword) {
+      alert("Please fill all fields");
+      return;
+    }
+
+    if (resetNewPassword !== resetConfirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await API.put("/api/update-password/admin-reset-password", {
+        hostelId: resetHostelId,
+        newPassword: resetNewPassword,
+      });
+      alert("Password reset successfully");
+      setIsResetPasswordDialogOpen(false);
+    } catch (error: any) {
+      console.error("Reset password failed", error);
+      alert(error.response?.data?.message || "Failed to reset password");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleOpenFeeDialog = () => {
     if (selectedHostelId !== "all") {
       setTargetHostelId(selectedHostelId);
@@ -226,6 +269,7 @@ export default function AdminDashboard() {
      RENDER
   ========================= */
   return (
+    <SuperAdminGuard>
     <div className="flex min-h-screen bg-gray-50 font-sans text-gray-900">
       {/* MOBILE HEADER (Visible < md) */}
       <div className="md:hidden fixed top-0 left-0 w-full bg-white z-40 px-4 py-3 flex items-center justify-between border-b shadow-sm">
@@ -361,6 +405,17 @@ export default function AdminDashboard() {
           >
             <IndianRupee size={16} />
             Set Fee
+          </button>
+          
+          <button
+            onClick={() => {
+              handleOpenResetPassword();
+              setMobileMenuOpen(false);
+            }}
+            className="w-full flex items-center justify-center gap-2 py-3 bg-white border border-gray-200 text-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-50 hover:text-gray-900 transition-all active:scale-95"
+          >
+            <Lock size={16} />
+            Reset Password
           </button>
 
           <div className="pt-4 border-t border-gray-100 mt-4">
@@ -748,15 +803,6 @@ export default function AdminDashboard() {
                                 <Eye className="w-4 h-4" />
                               </button>
 
-                              {directoryTab === "students" && (
-                                <Link
-                                  href="/fee"
-                                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-500 text-white text-xs font-bold hover:bg-green-600 shadow-sm transition-all"
-                                >
-                                  <IndianRupee className="w-3 h-3" />
-                                  Fees
-                                </Link>
-                              )}
                             </div>
                           </td>
                         </tr>
@@ -884,21 +930,88 @@ export default function AdminDashboard() {
               />
             </div>
 
-            <button
-              onClick={handleAddHostel}
-              disabled={loading}
-              className="w-full bg-orange-600 text-white py-2 rounded-lg font-semibold hover:bg-orange-700 transition disabled:opacity-50"
-            >
-              {loading ? (
-                <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent mx-auto" />
-              ) : (
-                "Create Hostel"
-              )}
-            </button>
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => setIsAddHostelDialogOpen(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddHostel}
+                disabled={loading}
+                className="px-4 py-2 text-sm font-medium text-white bg-gray-900 hover:bg-black rounded-lg shadow-lg shadow-gray-200 transition-all disabled:opacity-50"
+              >
+                {loading ? "Registering..." : "Register Hostel"}
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* RESET PASSWORD DIALOG */}
+      <Dialog open={isResetPasswordDialogOpen} onOpenChange={setIsResetPasswordDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reset Hostel Password</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">
+                Select Hostel
+              </label>
+              <SearchableSelect
+                options={dialogHostelOptions}
+                value={resetHostelId}
+                onChange={(val) => setResetHostelId(String(val))}
+                placeholder="-- Select Hostel --"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">
+                New Password
+              </label>
+              <input
+                type="password"
+                value={resetNewPassword}
+                onChange={(e) => setResetNewPassword(e.target.value)}
+                placeholder="Enter new password"
+                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">
+                Confirm Password
+              </label>
+              <input
+                type="password"
+                value={resetConfirmPassword}
+                onChange={(e) => setResetConfirmPassword(e.target.value)}
+                placeholder="Confirm new password"
+                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500"
+              />
+            </div>
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => setIsResetPasswordDialogOpen(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                disabled={loading}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleResetPassword}
+                disabled={loading}
+                className="px-4 py-2 text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 rounded-lg shadow-lg shadow-orange-200 transition-all disabled:opacity-50"
+              >
+                {loading ? "Resetting..." : "Reset Password"}
+              </button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
     </div>
+    </SuperAdminGuard>
   );
 }
 

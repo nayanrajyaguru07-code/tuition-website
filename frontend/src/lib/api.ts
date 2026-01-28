@@ -18,8 +18,9 @@ API.interceptors.request.use(
       // ⛔ Don't attach token to auth routes
       const isAuthRoute =
         url.includes("/login") ||
-        url.includes("/register") ||
-        url.includes("/auth");
+        url.includes("/signup") ||
+        url.includes("/auth") ||
+        url.includes("/register");
 
       if (token && !isAuthRoute) {
         config.headers = config.headers || {};

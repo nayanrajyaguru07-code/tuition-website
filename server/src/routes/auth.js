@@ -62,7 +62,7 @@ authRouter.post("/login", async (req, res) => {
     if (email === "admin" && password === "admin") {
       if (secret === "secret") {
         // Simple secret key
-        const token = generateToken({ id: 1, email: "admin@tuition.com" });
+        const token = generateToken({ id: 0, email: "admin@tuition.com" });
         return res
           .status(200)
           .cookie("token", token, {
@@ -75,7 +75,7 @@ authRouter.post("/login", async (req, res) => {
             message: "Super Admin login successful",
             token,
             hostel: {
-              id: 1,
+              id: 0,
               hostelName: "Main Hostel",
               email: "admin@tuition.com",
             },
