@@ -1,5 +1,12 @@
+"use client";
+
 import ExpenseManager from "@/app/pages/ExpenseManager";
+import SuperAdminGuard from "@/components/SuperAdminGuard";
 
 export default function AddExpensePage() {
-  return <ExpenseManager initialTab="add" />;
+  return (
+    <SuperAdminGuard>
+      <ExpenseManager initialTab="add" />
+    </SuperAdminGuard>
+  );
 }

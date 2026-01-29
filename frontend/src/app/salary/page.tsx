@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
+import SuperAdminGuard from "@/components/SuperAdminGuard";
+
 import { API } from "@/lib/api";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
@@ -29,7 +31,7 @@ type Payment = {
 
 import { useSearchParams } from "next/navigation";
 
-export default function SalaryManager() {
+function SalaryManagerContent() {
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<"pay" | "history">("pay");
 
@@ -417,5 +419,21 @@ export default function SalaryManager() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function SalaryManager() {
+  return (
+    <SuperAdminGuard>
+      <Suspense
+        fallback={
+          <div className="flex h-screen items-center justify-center">
+            Loading...
+          </div>
+        }
+      >
+        <SalaryManagerContent />
+      </Suspense>
+    </SuperAdminGuard>
   );
 }
