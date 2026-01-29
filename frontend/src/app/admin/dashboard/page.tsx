@@ -266,6 +266,13 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("hostel");
+    localStorage.clear();
+    window.location.href = "/";
+  };
+
   /* =========================
      RENDER
   ========================= */
@@ -420,13 +427,14 @@ export default function AdminDashboard() {
             </button>
 
             <div className="pt-4 border-t border-gray-100 mt-4">
-              <Link
-                href="/home"
-                className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
+                type="button"
               >
                 <LogOut size={18} />
                 <span>Logout</span>
-              </Link>
+              </button>
             </div>
           </div>
         </aside>

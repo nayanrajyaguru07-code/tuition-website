@@ -277,59 +277,75 @@ feeCollectionRouter.get(
   authMiddleware,
   async (req, res) => {
     try {
-      const hostelId = req.user.id;
-      // const hostelId = 1;
-
       const studentId = parseInt(req.params.studentId);
 
       if (isNaN(studentId)) {
         return res.status(400).json({ message: "Invalid Student ID" });
       }
 
-      // 1. Get Hostel Details (to find the Total Fee)
-      const hostel = await Prisma.hostel.findUnique({
-        where: { id: hostelId },
-        select: { fee: true }, // We only need the fee column
-      });
-
-      if (!hostel) {
-        return res.status(404).json({ message: "Hostel not found" });
-      }
-
-      // 2. Get Student Details (Name, etc.)
-      const student = await Prisma.student.findFirst({
-        where: { id: studentId, hostelId: hostelId },
-        select: { id: true, fullName: true, studentMobileNo: true },
+      // 1. Fetch Student First
+      // We need to fetch the student first to know their 'hostelId'.
+      // This allows the Super Admin to look up the correct hostel fee.
+      const student = await Prisma.student.findUnique({
+        where: { id: studentId },
+        select: {
+          id: true,
+          fullName: true,
+          studentMobileNo: true,
+          hostelId: true, // ✅ Needed to find the correct hostel fee
+        },
       });
 
       if (!student) {
-        return res
-          .status(404)
-          .json({ message: "Student not found or access denied" });
+        return res.status(404).json({ message: "Student not found" });
       }
 
-      // 3. Calculate Total Paid (Sum of all records)
+      // 2. PERMISSION CHECK
+      // If the user is NOT a Super Admin, they must own this student.
+      if (!req.user.isSuperAdmin && student.hostelId !== req.user.id) {
+        return res.status(403).json({ message: "Unauthorized: Access denied" });
+      }
+
+      // 3. Identify Target Hostel ID
+      // We use the student's actual hostelId (retrieved above)
+      const targetHostelId = student.hostelId;
+
+      // 4. Get Hostel Details (to find the Total Fee)
+      const hostel = await Prisma.hostel.findUnique({
+        where: { id: targetHostelId },
+        select: { fee: true },
+      });
+
+      if (!hostel) {
+        return res.status(404).json({ message: "Associated Hostel not found" });
+      }
+
+      // 5. Calculate Total Paid (Sum of all records)
       const paymentStats = await Prisma.feeCollection.aggregate({
         where: {
           studentId: studentId,
-          hostelId: hostelId,
+          hostelId: targetHostelId,
         },
         _sum: {
           amount: true,
         },
       });
 
-      // Handle null values (if no fee set or no payments made)
+      // 6. Final Calculations
       const totalFee = hostel.fee || 0;
       const totalPaid = paymentStats._sum.amount || 0;
       const dueFee = totalFee - totalPaid;
 
       res.status(200).json({
-        student: student,
+        student: {
+          id: student.id,
+          fullName: student.fullName,
+          studentMobileNo: student.studentMobileNo,
+        },
         feeStatus: {
-          totalFee: totalFee, // From Hostel Table
-          totalPaid: totalPaid, // Sum of collected fees
-          dueFee: dueFee, // Calculated Balance
+          totalFee: totalFee,
+          totalPaid: totalPaid,
+          dueFee: dueFee,
         },
       });
     } catch (error) {
