@@ -26,6 +26,7 @@ import {
   Banknote,
   Search,
   TrendingUp,
+  FileDown,
   Eye,
   IndianRupee,
   LogOut,
@@ -44,6 +45,7 @@ import {
 } from "@/components/ui/dialog";
 import SearchableSelect from "@/components/SearchableSelect";
 import toast from "react-hot-toast";
+import ExcelJS from "exceljs";
 
 /* =========================
    DASHBOARD
@@ -268,6 +270,164 @@ export default function AdminDashboard() {
       alert(err.response?.data?.error || "Failed to register hostel");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const exportStudentsToExcel = async () => {
+    try {
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Students");
+
+      worksheet.columns = [
+        { header: "ID", key: "id", width: 8 },
+        { header: "Full Name", key: "fullName", width: 25 },
+        { header: "Email", key: "email", width: 25 },
+        { header: "Mobile", key: "studentMobileNo", width: 15 },
+        { header: "Hostel Name", key: "hostelName", width: 20 },
+        { header: "Room No", key: "roomNumber", width: 12 },
+        { header: "Joining Date", key: "dateOfJoining", width: 15 },
+        { header: "Base Fee (Monthly)", key: "baseFee", width: 18 },
+        { header: "Fees Base Paid", key: "paidThisMonth", width: 18 },
+        { header: "Fees Base Unpaid", key: "unpaidThisMonth", width: 18 },
+        { header: "Total Paid (All Time)", key: "totalPaid", width: 22 },
+        { header: "Total Balance Dues", key: "balanceDues", width: 18 },
+        { header: "Last Payment Date", key: "lastPaymentDate", width: 18 },
+      ];
+
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+      students.forEach((s) => {
+        const collections = s.feeCollections || [];
+        const totalPaid = collections.reduce(
+          (sum: number, f: any) => sum + (f.amount || 0),
+          0,
+        );
+
+        const paidThisMonth = collections
+          .filter((f: any) => new Date(f.paymentDate) >= startOfMonth)
+          .reduce((sum: number, f: any) => sum + (f.amount || 0), 0);
+
+        const baseFee = s.hostel?.fee || 0;
+        const unpaidThisMonth = Math.max(0, baseFee - paidThisMonth);
+
+        const lastPaymentDate =
+          collections.length > 0
+            ? new Date(
+                Math.max(
+                  ...collections.map((f: any) =>
+                    new Date(f.paymentDate).getTime(),
+                  ),
+                ),
+              ).toLocaleDateString()
+            : "No Payments";
+
+        worksheet.addRow({
+          id: s.id,
+          fullName: s.fullName,
+          email: s.email,
+          studentMobileNo: s.studentMobileNo,
+          hostelName: s.hostel?.hostelName || "-",
+          roomNumber: s.room?.roomNumber || "-",
+          dateOfJoining: new Date(s.createdAt).toLocaleDateString(),
+          baseFee: baseFee,
+          paidThisMonth: paidThisMonth,
+          unpaidThisMonth: unpaidThisMonth,
+          totalPaid: totalPaid,
+          balanceDues: baseFee - totalPaid,
+          lastPaymentDate: lastPaymentDate,
+        });
+      });
+
+      worksheet.getRow(1).font = { bold: true };
+      worksheet.getRow(1).fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFF97316" },
+      };
+      worksheet.getRow(1).font = { bold: true, color: { argb: "FFFFFFFF" } };
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `Students_Export_${new Date().toISOString().split("T")[0]}.xlsx`;
+      link.click();
+      toast.success("Excel exported successfully!");
+    } catch (error) {
+      console.error(error);
+      toast.error("Export failed");
+    }
+  };
+
+  const exportStaffToExcel = async () => {
+    try {
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Staff");
+
+      worksheet.columns = [
+        { header: "ID", key: "id", width: 8 },
+        { header: "Name", key: "name", width: 25 },
+        { header: "Role", key: "role", width: 15 },
+        { header: "Hostel Name", key: "hostelName", width: 20 },
+        { header: "Phone", key: "phone", width: 15 },
+        { header: "Email", key: "email", width: 25 },
+        { header: "Joined Date", key: "dateOfJoining", width: 15 },
+        { header: "Monthly Salary", key: "salary", width: 18 },
+        { header: "Salary Paid (This Month)", key: "paidThisMonth", width: 22 },
+        { header: "Total Paid (All Time)", key: "totalPaid", width: 18 },
+      ];
+
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+      staff.forEach((s) => {
+        const payments = s.salaryPayments || [];
+        const totalPaid = payments.reduce(
+          (sum: number, p: any) => sum + (p.amount || 0),
+          0,
+        );
+
+        const paidThisMonth = payments
+          .filter((p: any) => new Date(p.paymentDate) >= startOfMonth)
+          .reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
+
+        worksheet.addRow({
+          id: s.id,
+          name: s.name,
+          email: s.email || "-",
+          phone: s.phone,
+          role: s.role,
+          hostelName: s.hostel?.hostelName || "-",
+          dateOfJoining: new Date(s.dateOfJoining).toLocaleDateString(),
+          salary: s.salary || 0,
+          paidThisMonth: paidThisMonth,
+          totalPaid: totalPaid,
+        });
+      });
+
+      worksheet.getRow(1).font = { bold: true };
+      worksheet.getRow(1).fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FF374151" },
+      };
+      worksheet.getRow(1).font = { bold: true, color: { argb: "FFFFFFFF" } };
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `Staff_Export_${new Date().toISOString().split("T")[0]}.xlsx`;
+      link.click();
+      toast.success("Excel exported successfully!");
+    } catch (error) {
+      console.error(error);
+      toast.error("Export failed");
     }
   };
 
@@ -775,14 +935,28 @@ export default function AdminDashboard() {
                       ))}
                     </div>
 
-                    <div className="relative w-full sm:w-80">
-                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                      <input
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        placeholder={`Search ${directoryTab}...`}
-                        className="w-full pl-11 pr-4 py-3 bg-gray-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-orange-100 transition-all font-medium placeholder:text-gray-400"
-                      />
+                    <div className="flex gap-4 w-full sm:w-auto">
+                      <button
+                        onClick={
+                          directoryTab === "students"
+                            ? exportStudentsToExcel
+                            : exportStaffToExcel
+                        }
+                        className="flex items-center gap-2 px-5 py-2.5 bg-green-600 text-white rounded-xl text-sm font-semibold shadow-sm hover:bg-green-700 active:scale-95 transition-all"
+                      >
+                        <FileDown size={18} />
+                        <span className="hidden lg:inline">Export Excel</span>
+                      </button>
+
+                      <div className="relative w-full sm:w-80">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <input
+                          value={search}
+                          onChange={(e) => setSearch(e.target.value)}
+                          placeholder={`Search ${directoryTab}...`}
+                          className="w-full pl-11 pr-4 py-3 bg-gray-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-orange-100 transition-all font-medium placeholder:text-gray-400"
+                        />
+                      </div>
                     </div>
                   </div>
 

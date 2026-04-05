@@ -227,7 +227,13 @@ dashboardRouter.get("/details/students", async (req, res) => {
       where,
       include: {
         hostel: {
-          select: { hostelName: true },
+          select: { hostelName: true, fee: true },
+        },
+        room: {
+          select: { roomNumber: true },
+        },
+        feeCollections: {
+          select: { amount: true, paymentDate: true },
         },
       },
       orderBy: { createdAt: "desc" },
@@ -250,6 +256,14 @@ dashboardRouter.get("/details/staff", async (req, res) => {
 
     const staff = await Prisma.employee.findMany({
       where,
+      include: {
+        salaryPayments: {
+          select: { amount: true, paymentDate: true },
+        },
+        hostel: {
+          select: { hostelName: true },
+        },
+      },
       orderBy: { dateOfJoining: "desc" },
     });
 
