@@ -40,7 +40,7 @@ export default function Header() {
   return (
     <>
       {/* MOBILE TOGGLE (Hidden on Desktop) */}
-      <div className="md:hidden fixed top-0 left-0 w-full h-16 bg-white/80 backdrop-blur-md z-50 px-6 flex items-center justify-between border-b border-gray-100/50 shadow-sm">
+      <div className="md:hidden fixed top-0 left-0 w-full h-20 bg-white/90 backdrop-blur-xl z-40 px-6 flex items-center justify-between border-b border-gray-100 shadow-sm transition-all duration-300">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center text-white shadow-md">
             <Home size={16} strokeWidth={2.5} />
@@ -60,7 +60,7 @@ export default function Header() {
       {/* SIDEBAR (Drawer on mobile, permanent on desktop) */}
       <div
         className={`
-        fixed top-0 left-0 h-screen w-72 bg-white border-r border-gray-100 shadow-[20px_0_40px_rgba(0,0,0,0.04)] z-50 flex flex-col transition-transform duration-500 cubic-bezier(0.4, 0, 0.2, 1)
+        fixed top-0 left-0 h-screen w-72 bg-white border-r border-gray-100 shadow-[20px_0_40px_rgba(0,0,0,0.06)] z-50 flex flex-col transition-transform duration-500 cubic-bezier(0.4, 0, 0.2, 1)
         ${open ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
         md:pt-0 pt-0
       `}

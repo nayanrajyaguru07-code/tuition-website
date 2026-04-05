@@ -48,7 +48,7 @@ export default function StudentList() {
   );
 
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen p-4 md:p-6 lg:p-10">
       <div className="max-w-7xl mx-auto">
         {/* HEADER */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">

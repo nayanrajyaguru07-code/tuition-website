@@ -307,10 +307,9 @@ export default function AdminDashboard() {
         {/* ================= SIDEBAR ================= */}
         <aside
           className={`
-          fixed top-0 left-0 w-72 h-screen bg-white border-r border-gray-100 flex flex-col shadow-[20px_0_40px_rgba(0,0,0,0.04)] z-50 transition-transform duration-500 cubic-bezier(0.4, 0, 0.2, 1)
+          fixed top-0 left-0 w-72 h-screen bg-white border-r flex flex-col shadow-lg z-50 transition-transform duration-300
           ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
-          pt-0 md:pt-0
-      `}
+        `}
         >
           {/* BRAND */}
           <div className="p-8 pb-4 hidden md:block">

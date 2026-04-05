@@ -123,9 +123,9 @@ export default function ExpenseManager({
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-lg p-8">
-        <h2 className="text-2xl font-bold mb-6">Expense Management</h2>
+    <div className="min-h-screen bg-gray-100 p-0 md:p-6">
+      <div className="max-w-6xl mx-auto bg-white rounded-none md:rounded-2xl shadow-none md:shadow-lg p-6 md:p-10">
+        <h2 className="text-2xl font-bold mb-6 text-gray-900">Expense Management</h2>
 
         {/* TABS */}
         <div className="flex gap-3 mb-6">
