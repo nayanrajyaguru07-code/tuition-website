@@ -33,6 +33,7 @@ model Hostel {
   // Relations: expense and salary
   salaryPayments SalaryPayment[]
   expenses       Expense[]
+  rooms          Room[]
 }
 
 // ==========================
@@ -68,6 +69,10 @@ model Student {
   hostelId        Int
   hostel          Hostel   @relation(fields: [hostelId], references: [id])
 
+  // --- Room Allocation ---
+  roomId          Int?
+  room            Room?    @relation(fields: [roomId], references: [id])
+
   // --- Documents (URLs) ---
   passportPhotoUrl   String?  // URL to stored image
   idProofUrl         String?  // URL (Aadhaar / Passport / Voter ID)
@@ -80,6 +85,27 @@ model Student {
 
   // Relation: One Student has many Payment Records
   feeCollections FeeCollection[]
+}
+
+// ==========================
+// ROOM MODEL
+// ==========================
+model Room {
+  id          Int      @id @default(autoincrement())
+  roomNumber  String
+  type        String   // e.g., "Single", "Double", "Triple"
+  capacity    Int      @default(1)
+  price       Float?   @default(0)
+
+  // Relation to Hostel
+  hostelId    Int
+  hostel      Hostel   @relation(fields: [hostelId], references: [id])
+
+  // Relation to Students
+  students    Student[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 // ==========================

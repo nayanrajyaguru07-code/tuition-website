@@ -49,7 +49,11 @@ import toast from "react-hot-toast";
    DASHBOARD
 ========================= */
 export default function AdminDashboard() {
-  const [counts, setCounts] = useState({ totalStudents: 0, totalStaff: 0 });
+  const [counts, setCounts] = useState({
+    totalStudents: 0,
+    totalStaff: 0,
+    availableRooms: 0,
+  });
   const [financeData, setFinanceData] = useState<any[]>([]);
   const [recoveryData, setRecoveryData] = useState<any>(null);
   const [hostelList, setHostelList] = useState<any[]>([]);
@@ -484,6 +488,11 @@ export default function AdminDashboard() {
                       title="Total Staff"
                       value={counts.totalStaff}
                       icon={<Users />}
+                    />
+                    <StatCard
+                      title="Available Rooms"
+                      value={counts.availableRooms}
+                      icon={<Building2 />}
                     />
                     <StatCard
                       title="Revenue (Mo)"

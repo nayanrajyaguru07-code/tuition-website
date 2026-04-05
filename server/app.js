@@ -13,6 +13,7 @@ import dashboardRouter from "./src/routes/dashboard.js";
 import whatsappRouter from "./src/routes/whatsapp.js";
 import contactRouter from "./src/routes/contact.js";
 import updatePasswordRouter from "./src/routes/updatePassword.js";
+import roomRouter from "./src/routes/room.js";
 
 const app = express();
 
@@ -50,5 +51,6 @@ app.use("/api/dashboard", dashboardRouter);
 app.use("/api/whatsapp", whatsappRouter);
 app.use("/api/contact", contactRouter);
 app.use("/api/update-password", updatePasswordRouter);
+app.use("/api/room", roomRouter);
 
 export default app;

@@ -15,9 +15,21 @@ export default function StudentForm({
   isDialog?: boolean;
 }) {
   const [data, setData] = useState<any>({});
+  const [rooms, setRooms] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    // Fetch Available Rooms
+    API.get("/api/room/available-rooms")
+      .then((res) => {
+        const options = res.data.rooms.map((r: any) => ({
+          value: r.id,
+          label: `Room ${r.roomNumber} (${r.type})`,
+        }));
+        setRooms(options);
+      })
+      .catch((err) => console.error("Failed to fetch rooms", err));
+
     if (id) {
       setLoading(true);
       API.get(`/api/student/get-student/${id}`)
@@ -282,6 +294,24 @@ export default function StudentForm({
               })
             }
           />
+        </div>
+
+        {/* ROOM ASSIGNMENT */}
+        <div className="mb-8">
+          <h3 className="text-lg font-semibold mb-4 text-gray-800">
+            Hostel Assignment
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label className={labelClass}>Assign Room</label>
+              <SearchableSelect
+                options={rooms}
+                value={data.roomId || ""}
+                onChange={(val) => setData({ ...data, roomId: val })}
+                placeholder="Select an available room"
+              />
+            </div>
+          </div>
         </div>
 
         {/* DOCUMENTS */}

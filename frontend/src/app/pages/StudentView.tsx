@@ -155,6 +155,14 @@ export default function StudentView({ id }: { id: string }) {
         />
         <DetailRow label="School/College" value={student.schoolCollegeName} />
         <DetailRow label="Class/Course" value={student.courseClassYear} />
+        <DetailRow
+          label="Room Allocated"
+          value={
+            student.room
+              ? `Room ${student.room.roomNumber} (${student.room.type})`
+              : "Not Allocated"
+          }
+        />
       </div>
 
       <div className="mt-6 pt-4 border-t border-orange-100">

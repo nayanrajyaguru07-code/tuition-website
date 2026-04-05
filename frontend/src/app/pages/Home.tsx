@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Users, UserPlus, Briefcase, Wallet } from "lucide-react";
+import { Users, UserPlus, Briefcase, Wallet, Bed } from "lucide-react";
 import { API } from "@/lib/api";
 
 type Feature = {
@@ -24,6 +24,15 @@ const features = [
     bg: "bg-orange-50",
     iconBg: "from-orange-400 to-orange-500",
     glow: "from-orange-300/40 to-orange-400/40",
+  },
+  {
+    title: "Manage Rooms",
+    description: "Manage hostel rooms & availability",
+    href: "/rooms",
+    icon: <Bed size={26} />,
+    bg: "bg-blue-50",
+    iconBg: "from-blue-400 to-blue-500",
+    glow: "from-blue-300/40 to-blue-400/40",
   },
   {
     title: "Add Fee",
@@ -120,7 +129,7 @@ export default function Home() {
       </div>
 
       {/* FEATURE GRID */}
-      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
         {features.map((f) => (
           <Link
             key={f.title}

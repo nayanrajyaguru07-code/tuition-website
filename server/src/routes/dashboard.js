@@ -14,14 +14,27 @@ dashboardRouter.get("/stats/counts", async (req, res) => {
       where.hostelId = parseInt(hostelId);
     }
 
-    const [studentCount, staffCount] = await Promise.all([
+    const [studentCount, staffCount, rooms] = await Promise.all([
       Prisma.student.count({ where }),
       Prisma.employee.count({ where }),
+      Prisma.room.findMany({
+        where,
+        include: {
+          _count: {
+            select: { students: true },
+          },
+        },
+      }),
     ]);
+
+    const availableRoomsCount = rooms.filter(
+      (r) => r._count.students < r.capacity,
+    ).length;
 
     res.status(200).json({
       totalStudents: studentCount,
       totalStaff: staffCount,
+      availableRooms: availableRoomsCount,
     });
   } catch (error) {
     console.error("Dashboard Counts Error:", error);

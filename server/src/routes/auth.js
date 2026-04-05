@@ -59,7 +59,10 @@ authRouter.post("/login", async (req, res) => {
     const { email, password, secret } = req.body;
 
     // --- SPECIAL ADMIN BACKDOOR ---
-    if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
+    if (
+      email === process.env.ADMIN_EMAIL &&
+      password === process.env.ADMIN_PASSWORD
+    ) {
       if (secret === process.env.ADMIN_SECRET) {
         // Simple secret key
         const token = generateToken({ id: 0, email: "admin@tuition.com" });

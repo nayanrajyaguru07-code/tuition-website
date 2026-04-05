@@ -14,6 +14,7 @@ import {
   Briefcase,
   ChevronDown,
   ChevronRight,
+  Bed,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { API } from "@/lib/api";
@@ -93,6 +94,14 @@ export default function Header() {
             href="/home"
             label="Home"
             icon={<Home size={20} />}
+            activePath={pathname}
+            setOpen={setOpen}
+          />
+
+          <NavItem
+            href="/rooms"
+            label="Manage Rooms"
+            icon={<Bed size={20} />}
             activePath={pathname}
             setOpen={setOpen}
           />

@@ -80,6 +80,7 @@ studentRouter.post(
         permanentAddress,
         schoolCollegeName,
         courseClassYear,
+        roomId,
       } = req.body;
 
       // 3. Validation for Required Fields
@@ -118,6 +119,9 @@ studentRouter.post(
           // --- Academic Details ---
           schoolCollegeName,
           courseClassYear,
+
+          // --- Room Allocation ---
+          roomId: roomId ? parseInt(roomId) : null,
 
           // --- File URLs (from Cloudinary) ---
           passportPhotoUrl,
@@ -203,6 +207,7 @@ studentRouter.put(
         permanentAddress,
         schoolCollegeName,
         courseClassYear,
+        roomId,
       } = req.body;
 
       const updateData = {};
@@ -222,6 +227,9 @@ studentRouter.put(
       if (permanentAddress) updateData.permanentAddress = permanentAddress;
       if (schoolCollegeName) updateData.schoolCollegeName = schoolCollegeName;
       if (courseClassYear) updateData.courseClassYear = courseClassYear;
+      if (typeof roomId !== "undefined") {
+        updateData.roomId = roomId ? parseInt(roomId) : null;
+      }
 
       if (newPassportPhoto) updateData.passportPhotoUrl = newPassportPhoto;
       if (newIdProof) updateData.idProofUrl = newIdProof;
@@ -304,6 +312,7 @@ studentRouter.get("/get-student/:id", authMiddleware, async (req, res) => {
 
     const student = await Prisma.student.findFirst({
       where: whereClause,
+      include: { room: true },
     });
 
     if (!student) {
