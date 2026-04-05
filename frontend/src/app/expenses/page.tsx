@@ -5,8 +5,6 @@ import SuperAdminGuard from "@/components/SuperAdminGuard";
 
 export default function ExpensesPage() {
   return (
-    <SuperAdminGuard>
-      <ExpenseManager />
-    </SuperAdminGuard>
+    <ExpenseManager />
   );
 }

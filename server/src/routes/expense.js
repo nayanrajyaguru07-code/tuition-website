@@ -9,8 +9,8 @@ import authMiddleware from "../middleware/authMiddleware.js";
 // ==========================
 expenseRouter.post("/add-expense", authMiddleware, async (req, res) => {
   try {
-    // const hostelId = req.user.id;
-    const hostelId = 1;
+    const hostelId = req.user.id;
+    // const hostelId = 1;
 
     const { title, amount, expenseDate, category, paymentMethod, description } =
       req.body;

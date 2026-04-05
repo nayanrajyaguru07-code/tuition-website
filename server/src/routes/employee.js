@@ -142,6 +142,7 @@ employeeRouter.get("/all-staff", authMiddleware, async (req, res) => {
         phone: true,
         role: true,
         photoUrl: true,
+        idProofUrl: true,
         salary: true,
         hostelId: true, // Useful for Super Admin to know which hostel they belong to
       },

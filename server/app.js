@@ -10,7 +10,6 @@ import employeeRouter from "./src/routes/employee.js";
 import expenseRouter from "./src/routes/expense.js";
 import salaryRouter from "./src/routes/salary.js";
 import dashboardRouter from "./src/routes/dashboard.js";
-import { initializeWhatsapp } from "./src/services/whatsappService.js";
 import whatsappRouter from "./src/routes/whatsapp.js";
 import contactRouter from "./src/routes/contact.js";
 import updatePasswordRouter from "./src/routes/updatePassword.js";

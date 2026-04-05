@@ -8,8 +8,9 @@ import authMiddleware from "../middleware/authMiddleware.js";
 // ==========================
 salaryRouter.post("/pay-salary", authMiddleware, async (req, res) => {
   try {
-    const hostelId = req.user.id;
-    // const hostelId = 1;
+    // For Super Admin, we'll determine the hostelId from the employee being paid.
+    // For normal admins, we'll use their personal hostelId.
+    const senderHostelId = req.user.id;
 
     const {
       employeeId,
@@ -27,9 +28,13 @@ salaryRouter.post("/pay-salary", authMiddleware, async (req, res) => {
       });
     }
 
-    // 1. Verify Employee belongs to Hostel
+    // 1. Verify Employee Ownership
+    const whereClause = req.user.isSuperAdmin
+      ? { id: parseInt(employeeId) }
+      : { id: parseInt(employeeId), hostelId: senderHostelId };
+
     const employee = await Prisma.employee.findFirst({
-      where: { id: parseInt(employeeId), hostelId: hostelId },
+      where: whereClause,
     });
 
     if (!employee) {
@@ -39,7 +44,7 @@ salaryRouter.post("/pay-salary", authMiddleware, async (req, res) => {
     // 2. Create Payment Record
     const newPayment = await Prisma.salaryPayment.create({
       data: {
-        hostelId: hostelId,
+        hostelId: employee.hostelId, // Use the employee's actual hostelId
         employeeId: parseInt(employeeId),
         amount: parseFloat(amount),
         salaryMonth: salaryMonth,
@@ -108,8 +113,12 @@ salaryRouter.get("/salary-details/:id", authMiddleware, async (req, res) => {
     // const hostelId = 1;
     const paymentId = parseInt(req.params.id);
 
+    const whereClause = req.user.isSuperAdmin
+      ? { id: paymentId }
+      : { id: paymentId, hostelId: req.user.id };
+
     const payment = await Prisma.salaryPayment.findFirst({
-      where: { id: paymentId, hostelId: hostelId },
+      where: whereClause,
       include: {
         employee: { select: { name: true, role: true } },
       },
@@ -139,17 +148,25 @@ salaryRouter.get(
 
       const employeeId = parseInt(req.params.employeeId);
 
+      const whereClause = req.user.isSuperAdmin
+        ? { id: employeeId }
+        : { id: employeeId, hostelId: req.user.id };
+
       // Verify Employee
       const employee = await Prisma.employee.findFirst({
-        where: { id: employeeId, hostelId: hostelId },
+        where: whereClause,
         select: { name: true, salary: true }, // getting base salary for reference
       });
 
       if (!employee)
         return res.status(404).json({ message: "Employee not found" });
 
+      const historyWhereClause = req.user.isSuperAdmin
+        ? { employeeId: employeeId }
+        : { employeeId: employeeId, hostelId: req.user.id };
+
       const history = await Prisma.salaryPayment.findMany({
-        where: { employeeId: employeeId, hostelId: hostelId },
+        where: historyWhereClause,
         orderBy: { paymentDate: "desc" },
       });
 
@@ -177,8 +194,12 @@ salaryRouter.put("/update-salary/:id", authMiddleware, async (req, res) => {
     const { amount, salaryMonth, paymentDate, paymentMethod, remarks } =
       req.body;
 
+    const whereClause = req.user.isSuperAdmin
+      ? { id: paymentId }
+      : { id: paymentId, hostelId: req.user.id };
+
     const existingPayment = await Prisma.salaryPayment.findFirst({
-      where: { id: paymentId, hostelId: hostelId },
+      where: whereClause,
     });
 
     if (!existingPayment)
@@ -214,8 +235,12 @@ salaryRouter.delete("/delete-salary/:id", authMiddleware, async (req, res) => {
 
     const paymentId = parseInt(req.params.id);
 
+    const whereClause = req.user.isSuperAdmin
+      ? { id: paymentId }
+      : { id: paymentId, hostelId: req.user.id };
+
     const payment = await Prisma.salaryPayment.findFirst({
-      where: { id: paymentId, hostelId: hostelId },
+      where: whereClause,
     });
 
     if (!payment) return res.status(404).json({ message: "Payment not found" });
@@ -245,9 +270,13 @@ salaryRouter.get(
       // Optional: Filter by specific month from query params (e.g., ?month=Jan 2026)
       const { month } = req.query;
 
+      const employeeWhereClause = req.user.isSuperAdmin
+        ? { id: employeeId }
+        : { id: employeeId, hostelId: req.user.id };
+
       // 1. Get Employee's Base Salary (The "Total" expected)
       const employee = await Prisma.employee.findFirst({
-        where: { id: employeeId, hostelId: hostelId },
+        where: employeeWhereClause,
         select: { id: true, name: true, salary: true },
       });
 
@@ -255,21 +284,16 @@ salaryRouter.get(
         return res.status(404).json({ message: "Employee not found" });
 
       // 2. Calculate Total Paid
-      // If a month is provided, we filter by it. Otherwise, we might sum ALL history
-      // (but 'Due' usually only makes sense per month).
-      // Let's assume if no month is given, we return stats for ALL time vs specific month logic.
-
-      let whereClause = {
-        employeeId: employeeId,
-        hostelId: hostelId,
-      };
+      let paymentWhereClause = req.user.isSuperAdmin
+        ? { employeeId: employeeId }
+        : { employeeId: employeeId, hostelId: req.user.id };
 
       if (month) {
-        whereClause.salaryMonth = month;
+        paymentWhereClause.salaryMonth = month;
       }
 
       const paymentStats = await Prisma.salaryPayment.aggregate({
-        where: whereClause,
+        where: paymentWhereClause,
         _sum: { amount: true },
       });
 

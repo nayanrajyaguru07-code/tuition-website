@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { API } from "@/lib/api";
 import toast from "react-hot-toast";
 import SearchableSelect from "@/components/SearchableSelect";
+import StaffView from "./StaffView";
+import { Eye, Pencil, Trash2 } from "lucide-react";
 
 type Employee = {
   id: number;
@@ -20,13 +22,13 @@ type Employee = {
 };
 
 type EmployeeManagerProps = {
-  initialTab?: "list" | "add" | "edit";
+  initialTab?: "list" | "add" | "edit" | "view";
 };
 
 export default function EmployeeManager({
   initialTab = "list",
 }: EmployeeManagerProps) {
-  const [tab, setTab] = useState<"list" | "add" | "edit">(initialTab);
+  const [tab, setTab] = useState<"list" | "add" | "edit" | "view">(initialTab);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
@@ -133,11 +135,11 @@ export default function EmployeeManager({
 
         {/* TABS */}
         <div className="flex gap-3 mb-6">
-          {["list", "add", "edit"].map((t) => (
+          {["list", "add", "edit", "view"].map((t) => (
             <button
               key={t}
               onClick={() => setTab(t as any)}
-              disabled={t === "edit" && !selectedId}
+              disabled={(t === "edit" || t === "view") && !selectedId}
               className={`px-4 py-2 rounded-lg text-sm font-medium ${
                 tab === t
                   ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md"
@@ -147,6 +149,7 @@ export default function EmployeeManager({
               {t === "list" && "All Employees"}
               {t === "add" && "Add Employee"}
               {t === "edit" && "Edit Employee"}
+              {t === "view" && "View Details"}
             </button>
           ))}
         </div>
@@ -167,18 +170,27 @@ export default function EmployeeManager({
                 <div className="text-sm text-gray-500">{e.email}</div>
                 <div className="text-sm text-gray-600 mb-4">{e.role}</div>
 
-                <div className="mt-auto flex gap-3">
+                <div className="mt-auto flex gap-2">
+                  <button
+                    onClick={() => {
+                      setSelectedId(e.id);
+                      setTab("view");
+                    }}
+                    className="flex-1 bg-orange-50 text-orange-600 hover:bg-orange-100 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-1.5"
+                  >
+                    <Eye size={14} /> View
+                  </button>
                   <button
                     onClick={() => loadEmployeeDetails(e.id)}
-                    className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white py-2 rounded-lg text-sm shadow-sm transition-all"
+                    className="flex-1 bg-gray-50 text-gray-600 hover:bg-gray-100 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-1.5"
                   >
-                    Edit
+                    <Pencil size={14} /> Edit
                   </button>
                   <button
                     onClick={() => deleteEmployee(e.id)}
-                    className="flex-1 border border-red-200 text-red-600 hover:bg-red-50 py-2 rounded-lg text-sm transition-colors"
+                    className="p-2 border border-red-100 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                   >
-                    Delete
+                    <Trash2 size={16} />
                   </button>
                 </div>
               </div>
@@ -417,6 +429,13 @@ export default function EmployeeManager({
             >
               {loading ? "Updating..." : "Update Employee"}
             </button>
+          </div>
+        )}
+
+        {/* VIEW */}
+        {tab === "view" && selectedId && (
+          <div className="bg-white rounded-xl border border-orange-100 overflow-hidden">
+            <StaffView id={String(selectedId)} />
           </div>
         )}
       </div>

@@ -424,16 +424,14 @@ function SalaryManagerContent() {
 
 export default function SalaryManager() {
   return (
-    <SuperAdminGuard>
-      <Suspense
-        fallback={
-          <div className="flex h-screen items-center justify-center">
-            Loading...
-          </div>
-        }
-      >
-        <SalaryManagerContent />
-      </Suspense>
-    </SuperAdminGuard>
+    <Suspense
+      fallback={
+        <div className="flex h-screen items-center justify-center">
+          Loading...
+        </div>
+      }
+    >
+      <SalaryManagerContent />
+    </Suspense>
   );
 }

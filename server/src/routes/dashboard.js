@@ -139,23 +139,49 @@ dashboardRouter.get("/stats/current-month-recovery", async (req, res) => {
       );
     }
 
-    // Calculate Collected
-    const where = {
+    // 2. Calculate Collected
+    const commonWhere = {
       paymentDate: {
         gte: startOfMonth,
         lte: endOfMonth,
       },
     };
     if (hostelId && hostelId !== "all") {
-      where.hostelId = parseInt(hostelId);
+      commonWhere.hostelId = parseInt(hostelId);
     }
 
     const collectedThisMonth = await Prisma.feeCollection.aggregate({
-      where,
+      where: commonWhere,
+      _sum: { amount: true },
+    });
+
+    // 3. Calculate Salary Paid
+    const salaryPaidThisMonth = await Prisma.salaryPayment.aggregate({
+      where: commonWhere,
+      _sum: { amount: true },
+    });
+
+    // 4. Calculate General Expenses
+    const expenseWhere = {
+      expenseDate: {
+        gte: startOfMonth,
+        lte: endOfMonth,
+      },
+    };
+    if (hostelId && hostelId !== "all") {
+      expenseWhere.hostelId = parseInt(hostelId);
+    }
+
+    const generalExpensesThisMonth = await Prisma.expense.aggregate({
+      where: expenseWhere,
       _sum: { amount: true },
     });
 
     const collectedAmount = collectedThisMonth._sum.amount || 0;
+    const salaryPaidAmount = salaryPaidThisMonth._sum.amount || 0;
+    const generalExpensesAmount = generalExpensesThisMonth._sum.amount || 0;
+    const totalExpenseAmount = salaryPaidAmount + generalExpensesAmount;
+
     const pendingAmount = expectedRevenue - collectedAmount;
 
     res.status(200).json({
@@ -163,6 +189,9 @@ dashboardRouter.get("/stats/current-month-recovery", async (req, res) => {
       expected: expectedRevenue,
       collected: collectedAmount,
       pending: pendingAmount > 0 ? pendingAmount : 0,
+      salaryPaid: salaryPaidAmount,
+      generalExpenses: generalExpensesAmount,
+      totalExpense: totalExpenseAmount,
     });
   } catch (error) {
     console.error("Recovery Stats Error:", error);
