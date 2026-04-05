@@ -139,10 +139,7 @@ export default function Header() {
             label="Expenses"
             icon={<Wallet size={20} />}
             activePath={pathname}
-            items={[
-              { label: "All Expenses", href: "/expenses" },
-              { label: "Add Expense", href: "/expenses/add" },
-            ]}
+            items={[{ label: "All Expenses", href: "/expenses" }]}
             setOpen={setOpen}
           />
 
@@ -150,10 +147,7 @@ export default function Header() {
             label="Salary"
             icon={<Wallet size={20} />}
             activePath={pathname}
-            items={[
-              { label: "Salary Dashboard", href: "/salary" },
-              { label: "Pay Salary", href: "/salary?tab=pay" },
-            ]}
+            items={[{ label: "Salary Dashboard", href: "/salary" }]}
             setOpen={setOpen}
           />
         </nav>
