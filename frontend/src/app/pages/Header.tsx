@@ -39,8 +39,8 @@ export default function Header() {
 
   return (
     <>
-      {/* MOBILE TOGGLE (Visible on all screens now) */}
-      <div className="fixed top-0 left-0 w-full h-16 bg-white z-50 px-4 flex items-center justify-between border-b shadow-sm">
+      {/* MOBILE TOGGLE (Hidden on Desktop) */}
+      <div className="md:hidden fixed top-0 left-0 w-full h-16 bg-white z-50 px-4 flex items-center justify-between border-b shadow-sm">
         <span className="font-bold text-gray-900 truncate max-w-[200px]">
           {hostelName}
         </span>
@@ -52,12 +52,12 @@ export default function Header() {
         </button>
       </div>
 
-      {/* SIDEBAR (Collapsible on all screens) */}
+      {/* SIDEBAR (Drawer on mobile, permanent on desktop) */}
       <div
         className={`
         fixed top-0 left-0 h-screen w-64 bg-white border-r border-gray-100 shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-40 flex flex-col transition-transform duration-300 ease-in-out
-        ${open ? "translate-x-0" : "-translate-x-full"}
-        pt-16
+        ${open ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+        md:pt-0 pt-16
       `}
       >
         {/* BRAND */}
@@ -172,10 +172,10 @@ export default function Header() {
         </div>
       </div>
 
-      {/* MOBILE OVERLAY */}
+      {/* MOBILE OVERLAY (Hidden on Desktop) */}
       {open && (
         <div
-          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30"
+          className="md:hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-30"
           onClick={() => setOpen(false)}
         />
       )}

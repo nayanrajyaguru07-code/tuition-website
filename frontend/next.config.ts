@@ -1,20 +1,26 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
         protocol: "https",
         hostname: "placehold.co",
       },
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+      },
     ],
   },
-};
-
-// next.config.js
-module.exports = {
   async rewrites() {
-    return [{ source: "/meeting/:slug", destination: "/meet/:slug" }];
+    return [
+      {
+        source: "/api/:path*",
+        destination: "http://localhost:4000/api/:path*", // Proxy to Backend
+      },
+    ];
   },
 };
 
-module.exports = nextConfig;
+export default nextConfig;

@@ -39,7 +39,7 @@ export default function ClientLayout({
 
       {/* Main Content */}
       <main
-        className={`flex-1 transition-all duration-300 ${!isFullScreen ? "pt-16" : ""}`}
+        className={`flex-1 transition-all duration-300 ${!isFullScreen ? "pt-16 md:pt-0 md:pl-64" : ""}`}
       >
         {children}
         {!isFullScreen && (

@@ -28,17 +28,23 @@ feeCollectionRouter.post("/collect-fee", authMiddleware, async (req, res) => {
       });
     }
 
-    // 2. Verify Student Belongs to this Hostel
-    const student = await Prisma.student.findFirst({
+    // 2. Verify Student Exists
+    const student = await Prisma.student.findUnique({
       where: {
         id: parseInt(studentId),
-        hostelId: hostelId,
       },
     });
 
     if (!student) {
       return res.status(404).json({
-        message: "Student not found or does not belong to your hostel",
+        message: "Student not found",
+      });
+    }
+
+    // 2b. Permission Check
+    if (!req.user.isSuperAdmin && student.hostelId !== req.user.id) {
+      return res.status(403).json({
+        message: "Unauthorized: You do not own this student",
       });
     }
 
@@ -54,7 +60,7 @@ feeCollectionRouter.post("/collect-fee", authMiddleware, async (req, res) => {
 
         // Foreign Keys
         studentId: parseInt(studentId),
-        hostelId: hostelId,
+        hostelId: student.hostelId, // ✅ Use the student's actual hostelId
       },
     });
 
@@ -73,13 +79,13 @@ feeCollectionRouter.post("/collect-fee", authMiddleware, async (req, res) => {
 // ==========================
 feeCollectionRouter.get("/fee-history", authMiddleware, async (req, res) => {
   try {
-    const hostelId = req.user.id;
-    // const hostelId = 1;
+    // Dynamic Filter: Super Admin gets ALL; Normal Admin gets theirs
+    const whereClause = req.user.isSuperAdmin
+      ? {} // Empty = Fetch All records
+      : { hostelId: req.user.id };
 
     const history = await Prisma.feeCollection.findMany({
-      where: {
-        hostelId: hostelId,
-      },
+      where: whereClause,
       // Join with Student table to get name and mobile
       include: {
         student: {
@@ -128,18 +134,18 @@ feeCollectionRouter.delete(
 
       const feeId = parseInt(req.params.id);
 
-      // 1. Check if record exists and belongs to this hostel
-      const existingRecord = await Prisma.feeCollection.findFirst({
-        where: {
-          id: feeId,
-          hostelId: hostelId,
-        },
+      // 1. Check if record exists
+      const existingRecord = await Prisma.feeCollection.findUnique({
+        where: { id: feeId },
       });
 
       if (!existingRecord) {
-        return res
-          .status(404)
-          .json({ message: "Fee record not found or access denied" });
+        return res.status(404).json({ message: "Fee record not found" });
+      }
+
+      // 1b. Permission Check
+      if (!req.user.isSuperAdmin && existingRecord.hostelId !== req.user.id) {
+        return res.status(403).json({ message: "Unauthorized: Access denied" });
       }
 
       // 2. Delete the record
@@ -170,18 +176,18 @@ feeCollectionRouter.put(
       const { amount, paymentMethod, transactionId, remarks, paymentDate } =
         req.body;
 
-      // 1. Check if record exists and belongs to this hostel
-      const existingRecord = await Prisma.feeCollection.findFirst({
-        where: {
-          id: feeId,
-          hostelId: hostelId,
-        },
+      // 1. Check if record exists
+      const existingRecord = await Prisma.feeCollection.findUnique({
+        where: { id: feeId },
       });
 
       if (!existingRecord) {
-        return res
-          .status(404)
-          .json({ message: "Fee record not found or access denied" });
+        return res.status(404).json({ message: "Fee record not found" });
+      }
+
+      // 1b. Permission Check
+      if (!req.user.isSuperAdmin && existingRecord.hostelId !== req.user.id) {
+        return res.status(403).json({ message: "Unauthorized: Access denied" });
       }
 
       // 2. Prepare Update Data
@@ -226,23 +232,26 @@ feeCollectionRouter.get(
         return res.status(400).json({ message: "Invalid Student ID" });
       }
 
-      // 1. Verify Student Exists & Belongs to Hostel
-      const student = await Prisma.student.findFirst({
-        where: { id: studentId, hostelId: hostelId },
-        select: { fullName: true, studentMobileNo: true },
+      // 1. Verify Student Exists
+      const student = await Prisma.student.findUnique({
+        where: { id: studentId },
+        select: { id: true, fullName: true, studentMobileNo: true, hostelId: true },
       });
 
       if (!student) {
-        return res
-          .status(404)
-          .json({ message: "Student not found or access denied" });
+        return res.status(404).json({ message: "Student not found" });
+      }
+
+      // 1b. Permission Check
+      if (!req.user.isSuperAdmin && student.hostelId !== req.user.id) {
+        return res.status(403).json({ message: "Unauthorized: Access denied" });
       }
 
       // 2. Fetch Fee Records
       const feeRecords = await Prisma.feeCollection.findMany({
         where: {
           studentId: studentId,
-          hostelId: hostelId, // Redundant safety check, but good practice
+          // hostelId: hostelId, // No longer strictly needed but could be added if we want to be paranoid
         },
         orderBy: {
           paymentDate: "desc", // Show newest payments first

@@ -61,9 +61,12 @@ export default function StudentView({ id }: { id: string }) {
       {/* HEADER with Photo */}
       <div className="flex items-center gap-6 mb-8 bg-orange-50 p-6 rounded-2xl border border-orange-100">
         <img
-          src={student.passportPhotoUrl || "/avatar.png"}
+          src={student.passportPhotoUrl || "https://placehold.co/100x100?text=S"}
           className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md"
           alt="Student"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = "https://placehold.co/100x100?text=S";
+          }}
         />
         <div>
           <h2 className="text-2xl font-extrabold text-gray-900">
