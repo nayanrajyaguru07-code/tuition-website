@@ -43,6 +43,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import SearchableSelect from "@/components/SearchableSelect";
+import toast from "react-hot-toast";
 
 /* =========================
    DASHBOARD
@@ -187,7 +188,7 @@ export default function AdminDashboard() {
     }
 
     if (resetNewPassword !== resetConfirmPassword) {
-      alert("Passwords do not match");
+      toast.error("Passwords do not match");
       return;
     }
 
@@ -197,11 +198,11 @@ export default function AdminDashboard() {
         hostelId: resetHostelId,
         newPassword: resetNewPassword,
       });
-      alert("Password reset successfully");
+      toast.success("Password reset successfully");
       setIsResetPasswordDialogOpen(false);
     } catch (error: any) {
       console.error("Reset password failed", error);
-      alert(error.response?.data?.message || "Failed to reset password");
+      toast.error(error.response?.data?.message || "Failed to reset password");
     } finally {
       setLoading(false);
     }
@@ -219,7 +220,7 @@ export default function AdminDashboard() {
 
   const handleUpdateFee = async () => {
     if (!targetHostelId || !feeAmount) {
-      alert("Please select a hostel and enter a fee amount");
+      toast.error("Please select a hostel and enter a fee amount");
       return;
     }
 
@@ -228,11 +229,11 @@ export default function AdminDashboard() {
         hostelId: targetHostelId,
         amount: feeAmount,
       });
-      alert("Fee updated successfully!");
+      toast.success("Fee updated successfully!");
       setIsFeeDialogOpen(false);
     } catch (error) {
       console.error("Failed to update fee", error);
-      alert("Failed to update fee");
+      toast.error("Failed to update fee");
     }
   };
 
@@ -280,18 +281,18 @@ export default function AdminDashboard() {
     <SuperAdminGuard>
       <div className="flex min-h-screen bg-gray-50 font-sans text-gray-900">
         {/* MOBILE HEADER (Visible < md) */}
-        <div className="md:hidden fixed top-0 left-0 w-full bg-white z-40 px-4 py-3 flex items-center justify-between border-b shadow-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center text-white shadow-md">
-              <Building2 size={16} strokeWidth={2.5} />
+        <div className="md:hidden fixed top-0 left-0 w-full bg-white/80 backdrop-blur-md z-40 px-6 py-4 flex items-center justify-between border-b border-gray-100/50 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-orange-200">
+              <Building2 size={18} strokeWidth={2.5} />
             </div>
-            <span className="font-bold text-gray-900">AdminPortal</span>
+            <span className="font-bold text-gray-900 tracking-tight">AdminPortal</span>
           </div>
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="text-gray-700 p-1"
+            className="text-gray-700 p-2 hover:bg-gray-100 rounded-xl transition-all active:scale-90"
           >
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
         </div>
 
@@ -306,7 +307,7 @@ export default function AdminDashboard() {
         {/* ================= SIDEBAR ================= */}
         <aside
           className={`
-          fixed top-0 left-0 w-72 h-screen bg-white border-r border-gray-100 flex flex-col shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-50 transition-transform duration-300 ease-in-out
+          fixed top-0 left-0 w-72 h-screen bg-white border-r border-gray-100 flex flex-col shadow-[20px_0_40px_rgba(0,0,0,0.04)] z-50 transition-transform duration-500 cubic-bezier(0.4, 0, 0.2, 1)
           ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
           pt-0 md:pt-0
       `}
@@ -514,8 +515,8 @@ export default function AdminDashboard() {
 
                   {/* CHARTS */}
                   <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-                    <div className="xl:col-span-2 bg-white rounded-3xl p-8 shadow-[0_2px_20px_rgba(0,0,0,0.02)] border border-gray-100/50">
-                      <div className="flex items-center justify-between mb-8">
+                    <div className="xl:col-span-2 bg-white rounded-3xl p-4 md:p-8 shadow-[0_2px_20px_rgba(0,0,0,0.02)] border border-gray-100/50">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
                         <h2 className="text-lg font-bold text-gray-900">
                           Financial Overview
                         </h2>
@@ -575,7 +576,7 @@ export default function AdminDashboard() {
                       </div>
                     </div>
 
-                    <div className="bg-white rounded-3xl p-8 shadow-[0_2px_20px_rgba(0,0,0,0.02)] border border-gray-100/50">
+                    <div className="bg-white rounded-3xl p-6 md:p-8 shadow-[0_2px_20px_rgba(0,0,0,0.02)] border border-gray-100/50">
                       <h2 className="text-lg font-bold text-gray-900 mb-6">
                         Monthly Recovery
                       </h2>
@@ -644,12 +645,14 @@ export default function AdminDashboard() {
                   {/* HOSTEL PERFORMANCE TABLE */}
                   {selectedHostelId === "all" && (
                     <div className="bg-white rounded-3xl shadow-[0_2px_20px_rgba(0,0,0,0.02)] border border-gray-100/50 overflow-hidden">
-                      <div className="px-8 py-6 border-b border-gray-100">
+                      <div className="px-6 md:px-8 py-6 border-b border-gray-100">
                         <h2 className="text-lg font-bold text-gray-900">
                           Hostel Performance
                         </h2>
                       </div>
-                      <div className="overflow-x-auto">
+
+                      {/* DESKTOP TABLE */}
+                      <div className="hidden md:block overflow-x-auto">
                         <table className="w-full text-sm">
                           <thead className="bg-gray-50/50 text-gray-400 uppercase tracking-wider text-xs">
                             <tr>
@@ -706,6 +709,39 @@ export default function AdminDashboard() {
                           </tbody>
                         </table>
                       </div>
+
+                      {/* MOBILE CARD VIEW */}
+                      <div className="md:hidden divide-y divide-gray-100">
+                        {performanceData.map((h) => {
+                          const profit = h.totalRevenue - h.totalExpense;
+                          return (
+                            <div key={h.id} className="p-6 space-y-4">
+                              <div className="flex items-center justify-between">
+                                <span className="font-bold text-gray-900">{h.name}</span>
+                                <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${profit > 0 ? "bg-green-50 text-green-700 border border-green-100" : "bg-red-50 text-red-700 border border-red-100"}`}>
+                                  {profit > 0 ? "Healthy" : "Deficit"}
+                                </span>
+                              </div>
+                              <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                  <p className="text-gray-400 text-[10px] uppercase font-bold tracking-tight mb-1">Revenue</p>
+                                  <p className="text-gray-900 font-semibold">₹{h.totalRevenue.toLocaleString()}</p>
+                                </div>
+                                <div>
+                                  <p className="text-gray-400 text-[10px] uppercase font-bold tracking-tight mb-1">Expense</p>
+                                  <p className="text-gray-900 font-semibold">₹{h.totalExpense.toLocaleString()}</p>
+                                </div>
+                              </div>
+                              <div className="pt-3 border-t border-gray-50 flex items-center justify-between">
+                                <span className="text-gray-400 text-xs font-medium">Net Profit</span>
+                                <span className={`text-lg font-bold ${profit >= 0 ? "text-green-600" : "text-red-500"}`}>
+                                  {profit >= 0 ? "+" : ""}₹{profit.toLocaleString()}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -742,7 +778,8 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
-                  <div className="overflow-x-auto">
+                  {/* DESKTOP TABLE */}
+                  <div className="hidden md:block overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead className="bg-gray-50/50 text-gray-400 uppercase tracking-wider text-xs">
                         <tr>
@@ -821,6 +858,56 @@ export default function AdminDashboard() {
                         ))}
                       </tbody>
                     </table>
+                  </div>
+
+                  {/* MOBILE CARD VIEW */}
+                  <div className="md:hidden divide-y divide-gray-100">
+                    {filteredList.map((i) => (
+                      <div key={i.id} className="p-6 space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center text-orange-700 font-bold text-sm">
+                              {i.fullName?.[0] || i.name?.[0] || "?"}
+                            </div>
+                            <div>
+                              <p className="font-bold text-gray-900">{i.fullName || i.name}</p>
+                              <p className="text-xs text-gray-500">{i.role || (i.hostel?.hostelName ? "Student" : "Staff")}</p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => {
+                              setViewId(String(i.id));
+                              setViewType(
+                                directoryTab === "students"
+                                  ? "student"
+                                  : "staff",
+                              );
+                            }}
+                            className="p-2.5 rounded-xl bg-orange-50 text-orange-600 shadow-sm shadow-orange-100 active:scale-95 transition-all"
+                          >
+                            <Eye className="w-5 h-5" />
+                          </button>
+                        </div>
+                        <div className="grid grid-cols-1 gap-2 border-t border-gray-50 pt-4">
+                          <div className="flex items-center gap-2 text-sm">
+                            <span className="text-gray-400 font-medium w-20">Email:</span>
+                            <span className="text-gray-900 truncate">{i.email}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm">
+                            <span className="text-gray-400 font-medium w-20">Phone:</span>
+                            <span className="text-gray-900">{i.studentMobileNo || i.phone || "N/A"}</span>
+                          </div>
+                          {i.hostel?.hostelName && (
+                            <div className="flex items-center gap-2 text-sm">
+                              <span className="text-gray-400 font-medium w-20">Hostel:</span>
+                              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 text-[10px] font-bold uppercase">
+                                <Building2 size={10} /> {i.hostel.hostelName}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                   {filteredList.length === 0 && (
                     <div className="p-10 text-center text-gray-400">

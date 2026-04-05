@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import SearchableSelect from "@/components/SearchableSelect";
+import { Pencil, Trash2 } from "lucide-react";
 
 type Expense = {
   id: number;
@@ -146,46 +147,128 @@ export default function ExpenseManager({
 
         {/* LIST */}
         {tab === "list" && (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm border">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="p-3 text-left">Title</th>
-                  <th className="p-3 text-left">Amount</th>
-                  <th className="p-3 text-left">Category</th>
-                  <th className="p-3 text-left">Method</th>
-                  <th className="p-3 text-left">Date</th>
-                  <th className="p-3 text-left">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {expenses.map((e) => (
-                  <tr key={e.id} className="border-t">
-                    <td className="p-3">{e.title}</td>
-                    <td className="p-3">₹{e.amount}</td>
-                    <td className="p-3">{e.category}</td>
-                    <td className="p-3">{e.paymentMethod}</td>
-                    <td className="p-3">
-                      {new Date(e.expenseDate).toLocaleDateString()}
-                    </td>
-                    <td className="p-3 flex gap-2">
-                      <button
-                        onClick={() => loadExpenseDetails(e)}
-                        className="bg-orange-100 text-orange-700 hover:bg-orange-200 px-3 py-1 rounded text-xs font-semibold"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => deleteExpense(e.id)}
-                        className="border border-red-200 text-red-600 hover:bg-red-50 px-3 py-1 rounded text-xs"
-                      >
-                        Delete
-                      </button>
-                    </td>
+          <div className="space-y-4">
+            {/* DESKTOP TABLE */}
+            <div className="hidden md:block overflow-x-auto rounded-xl border border-gray-100">
+              <table className="w-full text-sm border-collapse">
+                <thead className="bg-gray-50 text-gray-500 uppercase text-[10px] font-bold tracking-wider">
+                  <tr>
+                    <th className="px-6 py-4 text-left">Title</th>
+                    <th className="px-6 py-4 text-left">Amount</th>
+                    <th className="px-6 py-4 text-left">Category</th>
+                    <th className="px-6 py-4 text-left">Method</th>
+                    <th className="px-6 py-4 text-left">Date</th>
+                    <th className="px-6 py-4 text-right">Action</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-gray-100 bg-white">
+                  {expenses.map((e) => (
+                    <tr
+                      key={e.id}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="px-6 py-4 font-semibold text-gray-900">
+                        {e.title}
+                      </td>
+                      <td className="px-6 py-4 font-bold text-orange-600">
+                        ₹{e.amount}
+                      </td>
+                      <td className="px-6 py-4 text-gray-600">
+                        <span className="px-2 py-1 rounded-md bg-gray-100 text-[10px] font-bold uppercase">
+                          {e.category}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-gray-600">
+                        {e.paymentMethod}
+                      </td>
+                      <td className="px-6 py-4 text-gray-500 text-xs">
+                        {new Date(e.expenseDate).toLocaleDateString("en-IN", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </td>
+                      <td className="px-6 py-4 text-right flex justify-end gap-2">
+                        <button
+                          onClick={() => loadExpenseDetails(e)}
+                          className="bg-orange-50 text-orange-600 hover:bg-orange-100 p-2 rounded-lg transition-all"
+                          title="Edit"
+                        >
+                          <Pencil size={14} />
+                        </button>
+                        <button
+                          onClick={() => deleteExpense(e.id)}
+                          className="bg-red-50 text-red-600 hover:bg-red-100 p-2 rounded-lg transition-all"
+                          title="Delete"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* MOBILE CARDS */}
+            <div className="md:hidden space-y-4">
+              {expenses.map((e) => (
+                <div
+                  key={e.id}
+                  className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm active:scale-[0.98] transition-transform"
+                >
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <p className="font-bold text-gray-900 text-lg leading-tight">
+                        {e.title}
+                      </p>
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
+                        {new Date(e.expenseDate).toLocaleDateString("en-IN", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </p>
+                    </div>
+                    <p className="text-xl font-black text-orange-600">
+                      ₹{e.amount}
+                    </p>
+                  </div>
+
+                  <div className="flex gap-2 mb-4">
+                    <span className="px-2 py-0.5 rounded-md bg-gray-100 text-[10px] font-bold uppercase tracking-wider text-gray-500">
+                      {e.category}
+                    </span>
+                    <span className="px-2 py-0.5 rounded-md bg-orange-50 text-[10px] font-bold uppercase tracking-wider text-orange-600">
+                      {e.paymentMethod}
+                    </span>
+                  </div>
+
+                  <div className="flex gap-2 pt-4 border-t border-gray-50">
+                    <button
+                      onClick={() => loadExpenseDetails(e)}
+                      className="flex-1 bg-gray-900 text-white py-2.5 rounded-xl text-xs font-bold shadow-lg shadow-gray-200 transition-all flex items-center justify-center gap-2"
+                    >
+                      <Pencil size={14} /> Edit
+                    </button>
+                    <button
+                      onClick={() => deleteExpense(e.id)}
+                      className="flex-1 bg-red-50 text-red-600 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2"
+                    >
+                      <Trash2 size={14} /> Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {expenses.length === 0 && (
+              <div className="text-center py-20 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
+                <p className="text-gray-400 font-medium italic">
+                  No expenses recorded yet.
+                </p>
+              </div>
+            )}
           </div>
         )}
 

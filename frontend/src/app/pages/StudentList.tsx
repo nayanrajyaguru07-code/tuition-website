@@ -51,21 +51,26 @@ export default function StudentList() {
     <div className="min-h-screen p-6">
       <div className="max-w-7xl mx-auto">
         {/* HEADER */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
-          <h2 className="text-2xl font-bold text-gray-900">Students</h2>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
+          <div>
+            <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">Students</h2>
+            <p className="text-gray-500 text-sm mt-1">Manage and view all students in the system.</p>
+          </div>
 
-          <div className="flex gap-3">
-            <input
-              type="text"
-              placeholder="Search students..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative group">
+              <input
+                type="text"
+                placeholder="Search students..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full sm:w-64 bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all shadow-sm"
+              />
+            </div>
 
             <button
               onClick={() => setEditingId("new")}
-              className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md transition-all"
+              className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-orange-100 hover:shadow-orange-200 hover:-translate-y-0.5 transition-all active:scale-95"
             >
               + Add Student
             </button>
