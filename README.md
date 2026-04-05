@@ -1,22 +1,31 @@
 # Hostel Admin Pro
 **A professional-grade Hostel & Tuition Management System designed for efficiency and scalability.**
 
-## Features
-- **Comprehensive Dashboard**: Real-time overview of hostel activities, students, and finances.
-- **Student Management**: Complete student lifecycle management with document and photo uploads.
-- **Smart Fee Collection**: Track payments, calculate dues, and maintain detailed transaction histories.
-- **Staff & Salary Management**: Manage employee records, roles, and monthly payroll.
-- **Expense Tracking**: Categorize and monitor daily expenses to maintain financial health.
-- **Super Admin Portal**: Global administrative control for multi-hostel management and password resets.
-- **Modern Responsive UI**: Fully responsive sidebar layout optimized for desktop and mobile devices.
-- **Cloud-Powered Storage**: Secure handling of images and documents via Cloudinary integration.
+## 🚀 Features
+- **📊 Comprehensive Dashboard**: Real-time overview of hostel activities, students, and finances.
+- **🎓 Student Management**: Complete student lifecycle management with document and photo uploads.
+- **💰 Smart Fee Collection**: Track payments, calculate dues, and maintain detailed transaction histories.
+- **👥 Staff & Salary Management**: Manage employee records, roles, and monthly payroll.
+- **💸 Expense Tracking**: Categorize and monitor daily expenses to maintain financial health.
+- **🛡️ Super Admin Portal**: Global administrative control for multi-hostel management and password resets.
+- **📱 Modern Responsive UI**: Fully responsive sidebar layout optimized for desktop and mobile devices.
+- **☁️ Cloud-Powered Storage**: Secure handling of images and documents via Cloudinary integration.
 
-## Tech Stack
-- **Frontend**: Next.js 15 (App Router), React, Tailwind CSS, Axios
-- **Backend**: Node.js, Express.js
-- **Database**: PostgreSQL (Neon Serverless), Prisma ORM
-- **Authentication**: JWT (JSON Web Tokens)
-- **Media Storage**: Cloudinary API
+## 🛠️ Tech Stack
+
+### Frontend
+- ![Next.js](https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)
+- ![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
+- ![Tailwind CSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)
+
+### Backend
+- ![Node.js](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
+- ![Express.js](https://img.shields.io/badge/express.js-%23404d59.svg?style=for-the-badge&logo=express&logoColor=%2361DAFB)
+- ![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)
+
+### Database & Storage
+- ![PostgreSQL](https://img.shields.io/badge/postgresql-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
+- ![Cloudinary](https://img.shields.io/badge/Cloudinary-3448C5?style=for-the-badge&logo=Cloudinary&logoColor=white)
 
 ## Folder Structure
 ```text
