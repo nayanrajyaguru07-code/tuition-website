@@ -6,8 +6,9 @@ import SuperAdminGuard from "@/components/SuperAdminGuard";
 import { API } from "@/lib/api";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Printer } from "lucide-react";
 import SearchableSelect from "@/components/SearchableSelect";
+import { printReceipt } from "@/lib/receiptPrinter";
 
 type Employee = {
   id: number;
@@ -142,6 +143,22 @@ function SalaryManagerContent() {
           ...payForm,
         });
         toast.success("Salary Paid Successfully!");
+
+        // 🔹 Generate Receipt
+        const hostelData = localStorage.getItem("hostel");
+        const hostelName = hostelData
+          ? JSON.parse(hostelData).hostelName
+          : "Hostel";
+
+        printReceipt({
+          type: "Salary",
+          hostelName,
+          name: selectedEmployee.name,
+          amount: Number(payForm.amount),
+          date: payForm.paymentDate,
+          month: payForm.salaryMonth,
+          paymentMethod: payForm.paymentMethod,
+        });
       }
 
       resetForm();

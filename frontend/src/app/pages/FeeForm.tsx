@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { API } from "@/lib/api";
 import toast from "react-hot-toast";
 import SearchableSelect from "@/components/SearchableSelect";
+import { printReceipt } from "@/lib/receiptPrinter";
 
 type Student = {
   id: number;
@@ -124,6 +125,24 @@ export default function FeeForm({ initialTab = "collect" }: FeeFormProps) {
         remarks,
       });
       toast.success("Fee collected successfully");
+
+      // 🔹 Generate Receipt
+      const hostelData = localStorage.getItem("hostel");
+      const hostelName = hostelData
+        ? JSON.parse(hostelData).hostelName
+        : "Hostel";
+      const student = students.find((s) => String(s.id) === studentId);
+
+      printReceipt({
+        type: "Fee",
+        hostelName,
+        name: student?.fullName || "Student",
+        amount: Number(amount),
+        date: paymentDate || new Date().toLocaleDateString(),
+        dues: status ? status.feeStatus.dueFee - Number(amount) : undefined,
+        paymentMethod: paymentMethod,
+      });
+
       setAmount("");
       setTransactionId("");
       setRemarks("");
